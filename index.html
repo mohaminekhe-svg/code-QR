@@ -48,7 +48,7 @@
         <!-- 1. HOME VIEW -->
         <section id="viewHome" class="text-center py-6 md:py-12 flex flex-col items-center">
             
-            <!-- Project Overview Card with Description under Cover Image -->
+            <!-- Project Overview Card -->
             <div class="w-full max-w-2xl glass-card rounded-3xl border border-slate-800 overflow-hidden shadow-2xl mb-8 text-right">
                 <!-- Cover Image Area -->
                 <div class="relative w-full h-48 md:h-56 bg-slate-900 overflow-hidden flex items-center justify-center border-b border-slate-800/80">
@@ -129,6 +129,13 @@
                         </div>
                     </div>
 
+                    <!-- Description Field -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1.5">نبذة عني (Description)</label>
+                        <textarea id="inputDescription" rows="3" placeholder="اكتب نبذة قصيرة عن نفسك أو عملك أو مهاراتك..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm resize-none"></textarea>
+                    </div>
+
+                    <!-- Image Upload -->
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-2">الصورة الشخصية</label>
                         <div class="border-2 border-dashed border-slate-800 rounded-2xl p-6 text-center bg-slate-900/30 relative">
@@ -333,6 +340,7 @@
         function resetFormData() {
             document.getElementById('inputFirstName').value = '';
             document.getElementById('inputLastName').value = '';
+            document.getElementById('inputDescription').value = '';
             document.getElementById('phoneList').innerHTML = '';
             document.getElementById('whatsappList').innerHTML = '';
             document.getElementById('emailList').innerHTML = '';
@@ -503,10 +511,18 @@
             }
         }
 
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
         function getFormData() {
             const data = {
                 firstName: document.getElementById('inputFirstName').value.trim(),
                 lastName: document.getElementById('inputLastName').value.trim(),
+                description: document.getElementById('inputDescription').value.trim(),
                 phones: [],
                 whatsapps: [],
                 emails: [],
@@ -556,23 +572,40 @@
         }
 
         function renderCardHTML(data) {
+            const firstNameSafe = escapeHTML(data.firstName);
+            const lastNameSafe = escapeHTML(data.lastName);
+            const descriptionSafe = escapeHTML(data.description);
+
             let html = `
                 <div class="text-center mb-6">
                     <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 rounded-2xl mx-auto flex items-center justify-center text-3xl font-extrabold text-white shadow-xl mb-3">
-                        ${data.firstName.charAt(0)}
+                        ${firstNameSafe.charAt(0)}
                     </div>
-                    <h3 class="text-2xl font-bold text-white">${data.firstName} ${data.lastName}</h3>
+                    <h3 class="text-2xl font-bold text-white">${firstNameSafe} ${lastNameSafe}</h3>
+            `;
+
+            if (descriptionSafe) {
+                html += `
+                    <p class="text-slate-300 text-sm mt-3 leading-relaxed px-2 dir-rtl text-center max-w-sm mx-auto">
+                        ${descriptionSafe.replace(/\n/g, '<br>')}
+                    </p>
+                `;
+            }
+
+            html += `
                 </div>
                 <div class="space-y-3">
             `;
 
-            if (data.phones.length > 0) {
+            if (data.phones && data.phones.length > 0) {
                 html += `<div class="space-y-2">`;
                 data.phones.forEach(p => {
+                    const labelSafe = escapeHTML(p.label);
+                    const valSafe = escapeHTML(p.val);
                     html += `
-                        <a href="tel:${p.val}" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
-                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md font-medium">${p.label || 'هاتف'}</span>
-                            <span class="font-medium text-sm dir-ltr">${p.val}</span>
+                        <a href="tel:${valSafe}" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md font-medium">${labelSafe || 'هاتف'}</span>
+                            <span class="font-medium text-sm dir-ltr">${valSafe}</span>
                             <i class="fa-solid fa-phone text-blue-400"></i>
                         </a>
                     `;
@@ -580,14 +613,16 @@
                 html += `</div>`;
             }
 
-            if (data.whatsapps.length > 0) {
+            if (data.whatsapps && data.whatsapps.length > 0) {
                 html += `<div class="space-y-2">`;
                 data.whatsapps.forEach(w => {
-                    const cleanNum = w.val.replace(/[^0-9]/g, '');
+                    const labelSafe = escapeHTML(w.label);
+                    const valSafe = escapeHTML(w.val);
+                    const cleanNum = valSafe.replace(/[^0-9]/g, '');
                     html += `
                         <a href="https://wa.me/${cleanNum}" target="_blank" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
-                            <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-md font-medium">${w.label || 'واتساب'}</span>
-                            <span class="font-medium text-sm dir-ltr">${w.val}</span>
+                            <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-md font-medium">${labelSafe || 'واتساب'}</span>
+                            <span class="font-medium text-sm dir-ltr">${valSafe}</span>
                             <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i>
                         </a>
                     `;
@@ -595,13 +630,15 @@
                 html += `</div>`;
             }
 
-            if (data.emails.length > 0) {
+            if (data.emails && data.emails.length > 0) {
                 html += `<div class="space-y-2">`;
                 data.emails.forEach(e => {
+                    const labelSafe = escapeHTML(e.label);
+                    const valSafe = escapeHTML(e.val);
                     html += `
-                        <a href="mailto:${e.val}" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
-                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md font-medium">${e.label || 'بريد'}</span>
-                            <span class="font-medium text-sm dir-ltr truncate max-w-[180px]">${e.val}</span>
+                        <a href="mailto:${valSafe}" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md font-medium">${labelSafe || 'بريد'}</span>
+                            <span class="font-medium text-sm dir-ltr truncate max-w-[180px]">${valSafe}</span>
                             <i class="fa-solid fa-envelope text-indigo-400"></i>
                         </a>
                     `;
@@ -613,13 +650,15 @@
             let socialHtml = `<div class="pt-2 border-t border-slate-800"><div class="grid grid-cols-1 gap-2">`;
             
             platforms.forEach(p => {
-                const list = data.socials[p.id] || [];
+                const list = data.socials ? data.socials[p.id] || [] : [];
                 list.forEach(item => {
                     hasSocials = true;
+                    const itemLabelSafe = escapeHTML(item.label);
+                    const itemUrlSafe = escapeHTML(item.url);
                     socialHtml += `
-                        <a href="${item.url}" target="_blank" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                        <a href="${itemUrlSafe}" target="_blank" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
                             <i class="${p.icon} ${p.color} text-lg"></i>
-                            <span class="text-sm font-medium">${item.label}</span>
+                            <span class="text-sm font-medium">${itemLabelSafe}</span>
                             <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
                         </a>
                     `;
@@ -628,13 +667,15 @@
             socialHtml += `</div></div>`;
             if (hasSocials) html += socialHtml;
 
-            if (data.customLinks.length > 0) {
+            if (data.customLinks && data.customLinks.length > 0) {
                 html += `<div class="pt-2 border-t border-slate-800 space-y-2">`;
                 data.customLinks.forEach(cl => {
+                    const titleSafe = escapeHTML(cl.title);
+                    const urlSafe = escapeHTML(cl.url);
                     html += `
-                        <a href="${cl.url}" target="_blank" class="flex items-center justify-between p-3.5 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-300 transition">
+                        <a href="${urlSafe}" target="_blank" class="flex items-center justify-between p-3.5 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-300 transition">
                             <i class="fa-solid fa-link text-xs"></i>
-                            <span class="text-sm font-medium">${cl.title}</span>
+                            <span class="text-sm font-medium">${titleSafe}</span>
                             <i class="fa-solid fa-external-link text-xs"></i>
                         </a>
                     `;
