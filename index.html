@@ -30,11 +30,15 @@
             appId: "1:102938475610:web:a1b2c3d4e5f6"
         };
 
-        const app = initializeApp(firebaseConfig);
-        window.db = getFirestore(app);
-        window.firestoreDoc = doc;
-        window.firestoreSetDoc = setDoc;
-        window.firestoreGetDoc = getDoc;
+        try {
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            window.firestoreDoc = doc;
+            window.firestoreSetDoc = setDoc;
+            window.firestoreGetDoc = getDoc;
+        } catch(e) {
+            console.warn("Firebase Init Offline Fallback Mode Enabled");
+        }
     </script>
 
     <style>
@@ -315,7 +319,6 @@
     <!-- Modal Alert Window -->
     <div id="alertModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative text-center">
-            <!-- Close (X) Button -->
             <button onclick="closeAlertModal()" class="absolute top-3 left-3 text-slate-400 hover:text-white w-8 h-8 rounded-lg bg-slate-800/60 flex items-center justify-center transition text-lg">
                 &times;
             </button>
@@ -385,13 +388,11 @@
             checkUrlQuery();
         });
 
-        // Safe Navigation to Home
         function requestHomeNavigation() {
             const fname = document.getElementById('inputFirstName').value.trim();
             const lname = document.getElementById('inputLastName').value.trim();
             const desc = document.getElementById('inputDescription').value.trim();
             
-            // Check if user entered any data in wizard
             if (fname || lname || desc) {
                 document.getElementById('confirmHomeModal').classList.remove('hidden');
             } else {
@@ -822,51 +823,67 @@
             document.getElementById('reviewCardContainer').innerHTML = renderCardHTML(data);
         }
 
-        // Generate Random Safe Clean Card ID (No Personal Info In URL)
         function generateRandomCardId() {
             return 'c_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36).substring(4);
         }
 
         async function generateQrAndSave() {
+            const btn = document.getElementById('btnGenerateQr');
             const btnText = document.getElementById('generateBtnText');
+            
+            // Prevent multiple clicks
+            if (btn.disabled) return;
+            btn.disabled = true;
             btnText.innerText = 'جاري الحفظ...';
-            
-            const data = getFormData();
-            const cardId = generateRandomCardId();
-            const baseUrl = window.location.origin + window.location.pathname;
 
-            // Secure clean public URL without personal params in URL
-            generatedCardUrl = baseUrl + '?id=' + cardId;
-
-            // Attempt Cloud Save via Firestore
             try {
-                if (window.db && window.firestoreDoc && window.firestoreSetDoc) {
-                    const docRef = window.firestoreDoc(window.db, "artifacts", "defaultApp", "public", "data", "cards", cardId);
-                    await window.firestoreSetDoc(docRef, data);
-                } else {
-                    // Local Storage Fallback
-                    localStorage.setItem('kherfi_card_' + cardId, JSON.stringify(data));
-                }
-            } catch (err) {
-                console.warn("Cloud save fallback to local storage:", err);
+                const data = getFormData();
+                const cardId = generateRandomCardId();
+                const baseUrl = window.location.origin + window.location.pathname;
+
+                // Build Clean URL without personal data leakage
+                generatedCardUrl = baseUrl + '?id=' + cardId;
+
+                // 1. Guaranteed Immediate Local Fallback
                 localStorage.setItem('kherfi_card_' + cardId, JSON.stringify(data));
+
+                // 2. Non-blocking Async Firestore Cloud Save with 2.5s Timeout
+                if (window.db && window.firestoreDoc && window.firestoreSetDoc) {
+                    const savePromise = new Promise(async (resolve) => {
+                        try {
+                            const docRef = window.firestoreDoc(window.db, "artifacts", "defaultApp", "public", "data", "cards", cardId);
+                            await window.firestoreSetDoc(docRef, data);
+                            resolve(true);
+                        } catch(e) {
+                            resolve(false);
+                        }
+                    });
+
+                    const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(false), 2500));
+                    await Promise.race([savePromise, timeoutPromise]);
+                }
+
+                // 3. Render QR Code (Pure Clean URL)
+                const container = document.getElementById('qrcodeCanvas');
+                container.innerHTML = '';
+                
+                new QRCode(container, {
+                    text: generatedCardUrl,
+                    width: 220,
+                    height: 220,
+                    colorDark : "#090d16",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.M
+                });
+
+                showView('result');
+            } catch (err) {
+                console.error("Critical Generation Error:", err);
+                showAlertModal('حدث خطأ', 'تعذر معالجة إنشاء البطاقة. يرجى المحاولة مرة أخرى.');
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = 'إنشاء كود QR';
             }
-
-            // Render QR Code with Clean Safe Link
-            const container = document.getElementById('qrcodeCanvas');
-            container.innerHTML = '';
-            
-            new QRCode(container, {
-                text: generatedCardUrl,
-                width: 220,
-                height: 220,
-                colorDark : "#090d16",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
-            });
-
-            btnText.innerText = 'إنشاء كود QR';
-            showView('result');
         }
 
         function downloadQrCode() {
@@ -903,24 +920,22 @@
             if (cardId) {
                 let cardData = null;
 
-                // Try Firestore first
-                try {
-                    if (window.db && window.firestoreDoc && window.firestoreGetDoc) {
+                // LocalStorage First for instantaneous load
+                const localData = localStorage.getItem('kherfi_card_' + cardId);
+                if (localData) {
+                    try { cardData = JSON.parse(localData); } catch(e){}
+                }
+
+                // Try Firestore if available
+                if (!cardData && window.db && window.firestoreDoc && window.firestoreGetDoc) {
+                    try {
                         const docRef = window.firestoreDoc(window.db, "artifacts", "defaultApp", "public", "data", "cards", cardId);
                         const docSnap = await window.firestoreGetDoc(docRef);
                         if (docSnap.exists()) {
                             cardData = docSnap.data();
                         }
-                    }
-                } catch (e) {
-                    console.warn("Could not fetch from Firestore:", e);
-                }
-
-                // Fallback to localStorage
-                if (!cardData) {
-                    const localData = localStorage.getItem('kherfi_card_' + cardId);
-                    if (localData) {
-                        try { cardData = JSON.parse(localData); } catch(e){}
+                    } catch (e) {
+                        console.warn("Could not fetch from Cloud:", e);
                     }
                 }
 
