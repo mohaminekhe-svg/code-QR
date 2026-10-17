@@ -18,6 +18,7 @@
         body { font-family: 'Tajawal', sans-serif; }
         .step-active { border-color: #3b82f6; color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
         .glass-card { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        #qrcodeCanvas img, #qrcodeCanvas canvas { width: min(260px, 70vw) !important; height: auto !important; }
         .glow-effect { box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.3); }
     </style>
 </head>
@@ -221,8 +222,10 @@
 
                     <button id="btnGenerateQr" onclick="generateQrAndSave()" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/30 transition transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 text-lg">
                         <i class="fa-solid fa-qrcode"></i>
-                        <span>إنشاء كود QR</span>
+                        <span id="btnGenerateQrText">إنشاء كود QR</span>
                     </button>
+
+                    <div id="qrError" role="alert" class="hidden bg-red-500/10 border border-red-500/30 text-red-300 text-sm leading-relaxed rounded-xl p-4"></div>
                 </div>
 
             </div>
@@ -252,6 +255,7 @@
                 <div class="bg-white p-6 rounded-2xl inline-block shadow-2xl mb-6 border-4 border-slate-800/80">
                     <div id="qrcodeCanvas"></div>
                 </div>
+                <p id="qrNote" class="hidden text-xs text-slate-400 leading-relaxed mb-5"></p>
 
                 <!-- Action Buttons -->
                 <div class="space-y-3">
@@ -311,7 +315,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initSocialInputs();
-            checkUrlHash();
+            loadCardFromUrl();
         });
 
         function showView(viewName) {
@@ -512,8 +516,8 @@
         }
 
         function escapeHTML(str) {
-            if (!str) return '';
-            return str.replace(/[&<>'"]/g, 
+            if (str == null || str === '') return '';
+            return String(str).replace(/[&<>'"]/g, 
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
             );
         }
@@ -572,6 +576,7 @@
         }
 
         function renderCardHTML(data) {
+            data = normalizeCard(data);
             const firstNameSafe = escapeHTML(data.firstName);
             const lastNameSafe = escapeHTML(data.lastName);
             const descriptionSafe = escapeHTML(data.description);
@@ -602,8 +607,9 @@
                 data.phones.forEach(p => {
                     const labelSafe = escapeHTML(p.label);
                     const valSafe = escapeHTML(p.val);
+                    const telSafe = escapeHTML(p.val.replace(/[^0-9+*#]/g, ''));
                     html += `
-                        <a href="tel:${valSafe}" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                        <a href="tel:${telSafe}" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
                             <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md font-medium">${labelSafe || 'هاتف'}</span>
                             <span class="font-medium text-sm dir-ltr">${valSafe}</span>
                             <i class="fa-solid fa-phone text-blue-400"></i>
@@ -618,9 +624,9 @@
                 data.whatsapps.forEach(w => {
                     const labelSafe = escapeHTML(w.label);
                     const valSafe = escapeHTML(w.val);
-                    const cleanNum = valSafe.replace(/[^0-9]/g, '');
+                    const cleanNum = w.val.replace(/[^0-9]/g, '').replace(/^00/, '');
                     html += `
-                        <a href="https://wa.me/${cleanNum}" target="_blank" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                        <a href="https://wa.me/${cleanNum}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
                             <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-md font-medium">${labelSafe || 'واتساب'}</span>
                             <span class="font-medium text-sm dir-ltr">${valSafe}</span>
                             <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i>
@@ -652,11 +658,12 @@
             platforms.forEach(p => {
                 const list = data.socials ? data.socials[p.id] || [] : [];
                 list.forEach(item => {
-                    hasSocials = true;
                     const itemLabelSafe = escapeHTML(item.label);
-                    const itemUrlSafe = escapeHTML(item.url);
+                    const itemUrlSafe = escapeHTML(safeUrl(item.url));
+                    if (!itemUrlSafe) return;
+                    hasSocials = true;
                     socialHtml += `
-                        <a href="${itemUrlSafe}" target="_blank" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                        <a href="${itemUrlSafe}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
                             <i class="${p.icon} ${p.color} text-lg"></i>
                             <span class="text-sm font-medium">${itemLabelSafe}</span>
                             <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
@@ -671,9 +678,10 @@
                 html += `<div class="pt-2 border-t border-slate-800 space-y-2">`;
                 data.customLinks.forEach(cl => {
                     const titleSafe = escapeHTML(cl.title);
-                    const urlSafe = escapeHTML(cl.url);
+                    const urlSafe = escapeHTML(safeUrl(cl.url));
+                    if (!urlSafe) return;
                     html += `
-                        <a href="${urlSafe}" target="_blank" class="flex items-center justify-between p-3.5 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-300 transition">
+                        <a href="${urlSafe}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-3.5 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-300 transition">
                             <i class="fa-solid fa-link text-xs"></i>
                             <span class="text-sm font-medium">${titleSafe}</span>
                             <i class="fa-solid fa-external-link text-xs"></i>
@@ -692,77 +700,487 @@
             document.getElementById('reviewCardContainer').innerHTML = renderCardHTML(data);
         }
 
-        function generateQrAndSave() {
-            const data = getFormData();
-            const jsonStr = JSON.stringify(data);
-            const encoded = encodeURIComponent(jsonStr);
-            
-            const baseUrl = window.location.origin + window.location.pathname;
-            generatedCardUrl = baseUrl + '#card=' + encoded;
+        // ======================================================================
+        //  إعدادات قاعدة البيانات (اختيارية) — Supabase
+        //  اتركهما فارغين لاستعمال الطريقة المضغوطة داخل الرابط (#c1=).
+        //  عند ملئهما تُحفظ البطاقة في قاعدة البيانات ويصبح الرابط قصيرًا (?c=ID).
+        //  مفتاح anon / publishable مفتاح عام بطبيعته؛ لا تضع هنا أبدًا مفتاح service_role.
+        // ======================================================================
+        const SUPABASE_URL = '';       // مثال: https://xxxx.supabase.co
+        const SUPABASE_ANON_KEY = '';  // مفتاح anon أو publishable فقط
 
+        // ===== CORE-START (منطق نقي قابل للاختبار) =====
+        // سعات QR لوضع البايتات (مطابقة لجدول مكتبة qrcodejs 1.0.0): المستوى L ثم M
+        const QR_LIMITS = {
+            L: [17,32,53,78,106,134,154,192,230,271,321,367,425,458,520,586,644,718,792,858,929,1003,1091,1171,1273,1367,1465,1528,1628,1732,1840,1952,2068,2188,2303,2431,2563,2699,2809,2953],
+            M: [14,26,42,62,84,106,122,152,180,213,251,287,331,362,412,450,504,560,624,666,711,779,857,911,997,1059,1125,1190,1264,1370,1452,1538,1628,1722,1809,1911,1989,2099,2213,2331]
+        };
+        const QR_MAX_BYTES = QR_LIMITS.L[QR_LIMITS.L.length - 1];
+        const QR_DENSE_BYTES = 900; // فوق هذا يصبح الرمز كثيفًا ويصعب مسحه
+
+        function utf8Length(s) { return new TextEncoder().encode(s).length; }
+
+        // يختار أصغر نسخة ومستوى تصحيح يتسع للنص؛ يعيد null إذا تجاوز أقصى سعة
+        function pickQrLevel(text) {
+            const n = utf8Length(text) + 3;
+            for (const level of ['M', 'L']) {
+                const table = QR_LIMITS[level];
+                for (let v = 0; v < table.length; v++) {
+                    if (n <= table[v]) return { level, version: v + 1, bytes: n };
+                }
+            }
+            return null;
+        }
+
+        function str(v) { return typeof v === 'string' ? v : (v == null ? '' : String(v)); }
+
+        // يقبل إدخالًا بالصيغة الكاملة (القديمة) ويعيد كائنًا آمنًا كاملًا
+        function normalizeCard(o) {
+            if (!o || typeof o !== 'object') throw new Error('invalid card');
+            const lv = a => (Array.isArray(a) ? a : [])
+                .filter(x => x && typeof x === 'object')
+                .map(x => ({ label: str(x.label), val: str(x.val) }))
+                .filter(x => x.val);
+            const d = {
+                firstName: str(o.firstName), lastName: str(o.lastName), description: str(o.description),
+                phones: lv(o.phones), whatsapps: lv(o.whatsapps), emails: lv(o.emails),
+                socials: {}, customLinks: []
+            };
+            platforms.forEach(p => {
+                const list = o.socials && Array.isArray(o.socials[p.id]) ? o.socials[p.id] : [];
+                d.socials[p.id] = list.filter(x => x && typeof x === 'object')
+                    .map(x => ({ label: str(x.label) || p.defaultLabel, url: str(x.url) }))
+                    .filter(x => x.url);
+            });
+            d.customLinks = (Array.isArray(o.customLinks) ? o.customLinks : [])
+                .filter(x => x && typeof x === 'object')
+                .map(x => ({ title: str(x.title) || 'رابط', url: str(x.url) }))
+                .filter(x => x.url);
+            return d;
+        }
+
+        // صيغة مضغوطة (v2): مفاتيح قصيرة، حذف الفارغ، وحذف التسمية الافتراضية
+        function packCard(d) {
+            d = normalizeCard(d);
+            const o = { v: 2, n: d.firstName, l: d.lastName };
+            if (d.description) o.d = d.description;
+            const pairs = a => a.map(x => x.label ? [x.val, x.label] : [x.val]);
+            if (d.phones.length) o.p = pairs(d.phones);
+            if (d.whatsapps.length) o.w = pairs(d.whatsapps);
+            if (d.emails.length) o.e = pairs(d.emails);
+            const s = {};
+            platforms.forEach(p => {
+                const list = d.socials[p.id] || [];
+                if (list.length) s[p.id] = list.map(x => x.label === p.defaultLabel ? [x.url] : [x.url, x.label]);
+            });
+            if (Object.keys(s).length) o.s = s;
+            if (d.customLinks.length) o.c = d.customLinks.map(x => [x.title, x.url]);
+            return o;
+        }
+
+        function unpackCard(o) {
+            if (!o || typeof o !== 'object') throw new Error('invalid card');
+            if (o.v !== 2) return normalizeCard(o); // الصيغة القديمة الكاملة
+            const arr = a => Array.isArray(a) ? a.filter(Array.isArray) : [];
+            const d = {
+                firstName: str(o.n), lastName: str(o.l), description: str(o.d),
+                phones: arr(o.p).map(x => ({ val: str(x[0]), label: str(x[1]) })).filter(x => x.val),
+                whatsapps: arr(o.w).map(x => ({ val: str(x[0]), label: str(x[1]) })).filter(x => x.val),
+                emails: arr(o.e).map(x => ({ val: str(x[0]), label: str(x[1]) })).filter(x => x.val),
+                socials: {},
+                customLinks: arr(o.c).map(x => ({ title: str(x[0]) || 'رابط', url: str(x[1]) })).filter(x => x.url)
+            };
+            platforms.forEach(p => {
+                const list = o.s && typeof o.s === 'object' ? arr(o.s[p.id]) : [];
+                d.socials[p.id] = list.map(x => ({ url: str(x[0]), label: str(x[1]) || p.defaultLabel })).filter(x => x.url);
+            });
+            return d;
+        }
+
+        function bytesToB64url(bytes) {
+            let bin = '';
+            for (let i = 0; i < bytes.length; i += 0x8000) {
+                bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+            }
+            return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function b64urlToBytes(s) {
+            s = s.replace(/-/g, '+').replace(/_/g, '/').replace(/\s+/g, '');
+            while (s.length % 4) s += '=';
+            const bin = atob(s);
+            const out = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+            return out;
+        }
+
+        async function deflateRawBytes(bytes) {
+            try {
+                if (typeof CompressionStream !== 'undefined') {
+                    const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+                    return new Uint8Array(await new Response(stream).arrayBuffer());
+                }
+            } catch (e) { /* نجرب pako */ }
+            if (!(await ensurePako())) throw new Error('no compression available');
+            return pako.deflateRaw(bytes, { level: 9 });
+        }
+
+        async function inflateRawBytes(bytes) {
+            try {
+                if (typeof DecompressionStream !== 'undefined') {
+                    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+                    return new Uint8Array(await new Response(stream).arrayBuffer());
+                }
+            } catch (e) { /* نجرب pako */ }
+            if (!(await ensurePako())) throw new Error('no decompression available');
+            return pako.inflateRaw(bytes);
+        }
+
+        // يعيد "c1=..." (مضغوط) أو "c0=..." (غير مضغوط) — أيهما أقصر
+        async function encodeCardForHash(packed) {
+            const raw = new TextEncoder().encode(JSON.stringify(packed));
+            const plain = 'c0=' + bytesToB64url(raw);
+            try {
+                const comp = 'c1=' + bytesToB64url(await deflateRawBytes(raw));
+                return comp.length < plain.length ? comp : plain;
+            } catch (e) {
+                return plain;
+            }
+        }
+
+        async function decodeCardFromHash(token) { // token مثل "c1=...."
+            const m = /^c([01])=(.+)$/.exec(token);
+            if (!m) throw new Error('bad token');
+            let bytes = b64urlToBytes(m[2]);
+            if (m[1] === '1') bytes = await inflateRawBytes(bytes);
+            return JSON.parse(new TextDecoder().decode(bytes));
+        }
+
+        function decodeLegacyHash(hash) { // #card=<encodeURIComponent(JSON)>
+            const s = hash.slice('#card='.length);
+            let json;
+            try { json = decodeURIComponent(s); } catch (e) { json = s; }
+            try { return JSON.parse(json); }
+            catch (e) { return JSON.parse(decodeURIComponent(json)); } // ترميز مزدوج من بعض التطبيقات
+        }
+
+        // يمنع javascript: و data: ويضيف https:// للروابط المكتوبة بدون بروتوكول
+        function safeUrl(u) {
+            u = str(u).trim();
+            if (!u) return '';
+            if (/^https?:\/\//i.test(u)) return u;
+            if (/^(javascript|data|vbscript|file|blob|about):/i.test(u)) return '';
+            return 'https://' + u.replace(/^\/+/, '');
+        }
+        // ===== CORE-END =====
+
+        // ---------- تحميل المكتبات الخارجية عند الحاجة ----------
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = resolve;
+                s.onerror = () => reject(new Error('فشل تحميل ' + src));
+                document.head.appendChild(s);
+            });
+        }
+        async function ensureGlobal(check, urls) {
+            if (check()) return true;
+            for (const u of urls) {
+                try { await loadScript(u); if (check()) return true; } catch (e) { console.warn(e); }
+            }
+            return check();
+        }
+        const ensureQrLib = () => ensureGlobal(() => typeof QRCode !== 'undefined', [
+            'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+            'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js'
+        ]);
+        const ensurePako = () => ensureGlobal(() => typeof pako !== 'undefined', [
+            'https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js',
+            'https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js'
+        ]);
+
+        // ---------- قاعدة البيانات (Supabase عبر REST، بمفتاح anon فقط) ----------
+        const dbEnabled = () => /^https:\/\/[^\s]+$/.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length > 20;
+
+        async function fetchWithTimeout(url, options, ms) {
+            const ctrl = new AbortController();
+            const t = setTimeout(() => ctrl.abort(), ms);
+            try { return await fetch(url, { ...options, signal: ctrl.signal }); }
+            finally { clearTimeout(t); }
+        }
+
+        function randomCardId(len = 10) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            const buf = new Uint8Array(len);
+            crypto.getRandomValues(buf);
+            return Array.from(buf, b => chars[b % chars.length]).join('');
+        }
+
+        async function saveCardToDb(packed) {
+            const base = SUPABASE_URL.replace(/\/+$/, '');
+            for (let attempt = 0; attempt < 3; attempt++) {
+                const id = randomCardId();
+                const res = await fetchWithTimeout(base + '/rest/v1/cards', {
+                    method: 'POST',
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+                    body: JSON.stringify({ id, data: packed })
+                }, 15000);
+                if (res.ok) return id;
+                if (res.status === 409) continue; // تصادم معرّف نادر
+                throw new Error('DB insert failed: ' + res.status);
+            }
+            throw new Error('DB id collision');
+        }
+
+        async function loadCardFromDb(id) {
+            const base = SUPABASE_URL.replace(/\/+$/, '');
+            const res = await fetchWithTimeout(base + '/rest/v1/rpc/get_card', {
+                method: 'POST',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ p_id: id })
+            }, 15000);
+            if (!res.ok) throw new Error('DB read failed: ' + res.status);
+            return await res.json(); // null إذا لم توجد
+        }
+
+        // ---------- إنشاء رمز QR ----------
+        class UserError extends Error {}
+        let isGeneratingQr = false;
+        let lastCardData = null;
+
+        function getBaseUrl() { return window.location.href.split(/[?#]/)[0]; }
+
+        function showQrError(msg) {
+            const el = document.getElementById('qrError');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+        function clearQrError() {
+            const el = document.getElementById('qrError');
+            el.textContent = '';
+            el.classList.add('hidden');
+        }
+        function setGenerating(on) {
+            isGeneratingQr = on;
+            const btn = document.getElementById('btnGenerateQr');
+            btn.disabled = on;
+            btn.classList.toggle('opacity-60', on);
+            btn.classList.toggle('cursor-not-allowed', on);
+            document.getElementById('btnGenerateQrText').textContent = on ? 'جارٍ إنشاء الرمز...' : 'إنشاء كود QR';
+        }
+
+        function renderQr(text, info) {
             const container = document.getElementById('qrcodeCanvas');
             container.innerHTML = '';
-            
+            const modules = 17 + 4 * info.version;
+            const size = modules * 6; // دقة عالية ليبقى PNG واضحًا
             new QRCode(container, {
-                text: generatedCardUrl,
-                width: 220,
-                height: 220,
-                colorDark : "#090d16",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
+                text: text,
+                width: size,
+                height: size,
+                colorDark: "#090d16",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel[info.level]
             });
+            if (!container.firstChild) throw new Error('QR render produced nothing');
+        }
 
-            showView('result');
+        async function generateQrAndSave() {
+            if (isGeneratingQr) return; // منع النقر المتكرر
+            clearQrError();
+
+            const data = getFormData();
+            if (!data.firstName || !data.lastName) {
+                currentStep = 1;
+                updateStepView();
+                alert('يرجى إدخال الاسم واللقب قبل إنشاء رمز QR');
+                return;
+            }
+
+            setGenerating(true);
+            try {
+                if (!(await ensureQrLib())) {
+                    throw new UserError('تعذّر تحميل مكتبة إنشاء رمز QR. تحقق من اتصال الإنترنت ثم أعد المحاولة.');
+                }
+
+                const packed = packCard(data);
+                const base = getBaseUrl();
+                let url = '';
+                let mode = '';
+                let dbFailed = false;
+
+                if (dbEnabled()) {
+                    try {
+                        const id = await saveCardToDb(packed);
+                        url = base + '?c=' + id;
+                        mode = 'short';
+                    } catch (err) {
+                        console.error('تعذّر الحفظ في قاعدة البيانات', err);
+                        dbFailed = true;
+                    }
+                }
+                if (!url) {
+                    url = base + '#' + await encodeCardForHash(packed);
+                    mode = 'embedded';
+                }
+
+                const info = pickQrLevel(url);
+                if (!info) {
+                    const n = utf8Length(url);
+                    throw new UserError(
+                        'بيانات البطاقة أكبر من أقصى سعة يمكن أن يحملها رمز QR (' + n + ' بايت، والحد الأقصى ≈ ' + QR_MAX_BYTES + ' بايت). ' +
+                        (dbFailed ? 'كما تعذّر حفظ البطاقة في قاعدة البيانات الآن. ' : '') +
+                        'الحل: اختصر الوصف أو احذف بعض الحسابات والروابط الإضافية، ' +
+                        (dbEnabled() ? 'ثم أعد المحاولة.' : 'أو فعّل ربط قاعدة بيانات (Supabase) ليصبح الرمز رابطًا قصيرًا مهما كثرت المعلومات.')
+                    );
+                }
+
+                try {
+                    renderQr(url, info);
+                } catch (err) {
+                    console.error(err);
+                    throw new UserError('تعذّر رسم رمز QR لهذه البيانات. جرّب تقليل عدد الروابط أو طول الوصف.');
+                }
+
+                generatedCardUrl = url;
+                lastCardData = normalizeCard(data);
+
+                const note = document.getElementById('qrNote');
+                let msg = '';
+                if (mode === 'short') {
+                    msg = 'الرمز يحتوي على رابط قصير للبطاقة المحفوظة في قاعدة البيانات.';
+                } else {
+                    msg = dbFailed
+                        ? 'تعذّر الحفظ في قاعدة البيانات، لذلك تم تضمين بيانات البطاقة داخل الرابط نفسه.'
+                        : 'بيانات البطاقة مضغوطة ومضمّنة داخل الرابط نفسه، وتعمل دون حاجة إلى خادم.';
+                    if (info.bytes > QR_DENSE_BYTES) {
+                        msg += ' الرمز كثيف نسبيًا؛ اعرضه بحجم كبير وإضاءة جيدة، أو قلّل المعلومات ليسهل مسحه.';
+                    }
+                }
+                note.textContent = msg;
+                note.classList.remove('hidden');
+
+                showView('result');
+            } catch (err) {
+                console.error('فشل إنشاء رمز QR', err);
+                showQrError(err instanceof UserError
+                    ? err.message
+                    : 'حدث خطأ غير متوقع أثناء إنشاء رمز QR. أعد المحاولة، وإن تكرر الخطأ قلّل عدد الروابط.');
+            } finally {
+                setGenerating(false);
+            }
         }
 
         function downloadQrCode() {
-            const img = document.querySelector('#qrcodeCanvas img');
             const canvas = document.querySelector('#qrcodeCanvas canvas');
-            let src = '';
-            if (img && img.src) src = img.src;
-            else if (canvas) src = canvas.toDataURL("image/png");
+            const img = document.querySelector('#qrcodeCanvas img');
+            const source = canvas || (img && img.src ? img : null);
+            if (!source) { alert('لا يوجد رمز QR لتحميله. أنشئ الرمز أولًا.'); return; }
 
-            if (src) {
-                const a = document.createElement('a');
-                a.href = src;
-                a.download = 'KHERFI_QR_Card.png';
-                a.click();
-            }
+            const w = canvas ? canvas.width : (img.naturalWidth || 220);
+            const h = canvas ? canvas.height : (img.naturalHeight || 220);
+            const pad = Math.round(w * 0.06); // هامش أبيض لتسهيل المسح
+            const out = document.createElement('canvas');
+            out.width = w + pad * 2;
+            out.height = h + pad * 2;
+            const ctx = out.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, out.width, out.height);
+            ctx.drawImage(source, pad, pad, w, h);
+
+            const a = document.createElement('a');
+            a.href = out.toDataURL('image/png');
+            a.download = 'KHERFI_QR_Card.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
         }
 
-        function copyCardUrl() {
-            navigator.clipboard.writeText(generatedCardUrl).then(() => {
-                const txt = document.getElementById('copyBtnText');
+        async function copyCardUrl() {
+            if (!generatedCardUrl) return;
+            const txt = document.getElementById('copyBtnText');
+            try {
+                await navigator.clipboard.writeText(generatedCardUrl);
                 txt.innerText = 'تم النسخ بنجاح!';
                 setTimeout(() => txt.innerText = 'نسخ رابط البطاقة', 2000);
-            });
+            } catch (e) {
+                window.prompt('انسخ رابط البطاقة من هنا:', generatedCardUrl);
+            }
         }
 
         function viewCardDirectly() {
-            window.location.hash = generatedCardUrl.split('#')[1];
-            checkUrlHash();
+            if (!lastCardData) return;
+            try { history.pushState(null, '', generatedCardUrl); } catch (e) { /* مثل file:// */ }
+            loadSeq++; // إلغاء أي تحميل معلّق
+            renderPublicCard(lastCardData);
         }
 
-        function checkUrlHash() {
-            const hash = window.location.hash;
-            if (hash.startsWith('#card=')) {
-                try {
-                    const encoded = hash.replace('#card=', '');
-                    const jsonStr = decodeURIComponent(encoded);
-                    const data = JSON.parse(jsonStr);
+        // ---------- فتح البطاقة من الرابط ----------
+        let loadSeq = 0;
+        class CardLoadError extends Error {}
 
-                    document.getElementById('publicCardContent').innerHTML = renderCardHTML(data);
-                    showView('publicCard');
-                } catch (e) {
-                    console.error("خطأ في قراءة بيانات البطاقة من الرابط", e);
+        function renderPublicCard(data) {
+            document.getElementById('publicCardContent').innerHTML = renderCardHTML(data);
+            showView('publicCard');
+        }
+
+        function renderCardStatus(iconClass, title, message, withHomeButton) {
+            document.getElementById('publicCardContent').innerHTML = `
+                <div class="text-center py-6 space-y-3">
+                    <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-center text-2xl">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">${escapeHTML(title)}</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed">${escapeHTML(message)}</p>
+                    ${withHomeButton ? `<button type="button" onclick="goHome()" class="mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold px-6 py-2.5 rounded-xl text-sm">العودة للرئيسية</button>` : ''}
+                </div>`;
+            showView('publicCard');
+        }
+
+        function goHome() {
+            try { history.replaceState(null, '', getBaseUrl()); } catch (e) {}
+            loadSeq++;
+            showView('home');
+        }
+
+        async function loadCardFromUrl() {
+            const seq = ++loadSeq;
+            const id = new URLSearchParams(window.location.search).get('c');
+            const hash = window.location.hash || '';
+
+            try {
+                if (id) {
+                    if (!/^[A-Za-z0-9]{8,32}$/.test(id)) throw new CardLoadError('رابط البطاقة غير صحيح أو ناقص.');
+                    if (!dbEnabled()) throw new CardLoadError('هذه البطاقة محفوظة في قاعدة بيانات غير مفعّلة في هذه النسخة من الموقع.');
+                    renderCardStatus('fa-solid fa-spinner fa-spin text-blue-400', 'جارٍ تحميل البطاقة...', 'يرجى الانتظار لحظات.', false);
+                    let packed;
+                    try { packed = await loadCardFromDb(id); }
+                    catch (e) { console.error(e); throw new CardLoadError('تعذّر الاتصال بالخادم لتحميل البطاقة. تحقق من الإنترنت ثم أعد المحاولة.'); }
+                    if (seq !== loadSeq) return;
+                    if (!packed) throw new CardLoadError('لم يتم العثور على هذه البطاقة. ربما الرابط غير مكتمل.');
+                    renderPublicCard(unpackCard(packed));
+                } else if (/^#c[01]=/.test(hash)) {
+                    const obj = await decodeCardFromHash(hash.slice(1));
+                    if (seq !== loadSeq) return;
+                    renderPublicCard(unpackCard(obj));
+                } else if (hash.startsWith('#card=')) { // روابط قديمة
+                    renderPublicCard(unpackCard(decodeLegacyHash(hash)));
+                } else {
                     showView('home');
                 }
-            } else {
-                showView('home');
+            } catch (err) {
+                if (seq !== loadSeq) return;
+                console.error('خطأ في قراءة بيانات البطاقة', err);
+                const msg = err instanceof CardLoadError
+                    ? err.message
+                    : 'بيانات البطاقة في الرابط غير مكتملة أو تالفة. قد يكون الرابط قد قُصّ عند نسخه أو إرساله؛ اطلب من صاحب البطاقة رمزًا جديدًا.';
+                renderCardStatus('fa-solid fa-triangle-exclamation text-amber-400', 'تعذّر تحميل البطاقة', msg, true);
             }
         }
 
-        window.addEventListener('hashchange', checkUrlHash);
+        window.addEventListener('hashchange', loadCardFromUrl);
+        window.addEventListener('popstate', loadCardFromUrl);
     </script>
 </body>
 </html>
