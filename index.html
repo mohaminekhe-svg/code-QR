@@ -14,11 +14,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <!-- QRCode.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- Firebase SDK (Modular Core) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyKey_KherfiQR_PublicStorage",
+            authDomain: "kherfi-qr.firebaseapp.com",
+            projectId: "kherfi-qr",
+            storageBucket: "kherfi-qr.appspot.com",
+            messagingSenderId: "102938475610",
+            appId: "1:102938475610:web:a1b2c3d4e5f6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        window.db = getFirestore(app);
+        window.firestoreDoc = doc;
+        window.firestoreSetDoc = setDoc;
+        window.firestoreGetDoc = getDoc;
+    </script>
+
     <style>
         body { font-family: 'Tajawal', sans-serif; }
         .step-active { border-color: #3b82f6; color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
         .glass-card { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .glow-effect { box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.3); }
+        .field-error { border-color: #ef4444 !important; box-shadow: 0 0 0 1px #ef4444 !important; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-blue-500 selection:text-white">
@@ -26,7 +50,7 @@
     <!-- Header Navigation -->
     <header class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
-            <div class="flex items-center space-x-3 space-x-reverse cursor-pointer group" onclick="showView('home')">
+            <div class="flex items-center space-x-3 space-x-reverse cursor-pointer group" onclick="requestHomeNavigation()">
                 <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-xl font-bold shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
                     <i class="fa-solid fa-qrcode text-white"></i>
                 </div>
@@ -50,7 +74,6 @@
             
             <!-- Project Overview Card -->
             <div class="w-full max-w-2xl glass-card rounded-3xl border border-slate-800 overflow-hidden shadow-2xl mb-8 text-right">
-                <!-- Cover Image Area -->
                 <div class="relative w-full h-48 md:h-56 bg-slate-900 overflow-hidden flex items-center justify-center border-b border-slate-800/80">
                     <div class="absolute inset-0 bg-gradient-to-tr from-blue-900/40 via-indigo-900/20 to-purple-900/30"></div>
                     <i class="fa-solid fa-qrcode text-8xl md:text-9xl bg-gradient-to-tr from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent transform hover:scale-105 transition duration-500"></i>
@@ -59,7 +82,6 @@
                     </span>
                 </div>
 
-                <!-- Description Below Cover Image -->
                 <div class="p-5 md:p-6 bg-slate-900/90 border-b border-slate-800/80">
                     <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-2">
                         <i class="fa-solid fa-align-right text-[11px]"></i>
@@ -90,6 +112,14 @@
 
         <!-- 2. WIZARD FORM VIEW -->
         <section id="viewWizard" class="hidden">
+            <!-- Navigation Sub-bar -->
+            <div class="flex justify-between items-center mb-4 px-1">
+                <button type="button" onclick="requestHomeNavigation()" class="text-xs text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 font-medium">
+                    <i class="fa-solid fa-house text-blue-400"></i>
+                    <span>العودة إلى الصفحة الرئيسية</span>
+                </button>
+            </div>
+
             <!-- Progress Steps Header -->
             <div class="mb-8 glass-card p-4 rounded-2xl border border-slate-800">
                 <div class="flex justify-between items-center relative">
@@ -121,11 +151,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-300 mb-1.5">الاسم <span class="text-red-400">*</span></label>
-                            <input type="text" id="inputFirstName" autocomplete="given-name" placeholder="أدخل اسمك" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
+                            <input type="text" id="inputFirstName" autocomplete="given-name" placeholder="أدخل اسمك" oninput="clearInputError('inputFirstName')" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-300 mb-1.5">اللقب <span class="text-red-400">*</span></label>
-                            <input type="text" id="inputLastName" autocomplete="family-name" placeholder="أدخل لقبك" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
+                            <input type="text" id="inputLastName" autocomplete="family-name" placeholder="أدخل لقبك" oninput="clearInputError('inputLastName')" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                         </div>
                     </div>
 
@@ -135,7 +165,7 @@
                         <textarea id="inputDescription" rows="3" placeholder="اكتب نبذة قصيرة عن نفسك أو عملك أو مهاراتك..." class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm resize-none"></textarea>
                     </div>
 
-                    <!-- Image Upload -->
+                    <!-- Image Upload Widget -->
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-2">الصورة الشخصية</label>
                         <div class="border-2 border-dashed border-slate-800 rounded-2xl p-6 text-center bg-slate-900/30 relative">
@@ -150,7 +180,7 @@
                     </div>
                 </div>
 
-                <!-- STEP 2: Contacts (Dynamic) -->
+                <!-- STEP 2: Contacts -->
                 <div id="stepContent2" class="hidden space-y-6">
                     <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-3 flex items-center gap-2">
                         <i class="fa-solid fa-address-book text-blue-400"></i>
@@ -215,19 +245,17 @@
                         <span>الخطوة الرابعة: مراجعة المعلومات</span>
                     </h2>
 
-                    <div id="reviewCardContainer" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                        <!-- Review Card Injected Here -->
-                    </div>
+                    <div id="reviewCardContainer" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl"></div>
 
                     <button id="btnGenerateQr" onclick="generateQrAndSave()" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/30 transition transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 text-lg">
                         <i class="fa-solid fa-qrcode"></i>
-                        <span>إنشاء كود QR</span>
+                        <span id="generateBtnText">إنشاء كود QR</span>
                     </button>
                 </div>
 
             </div>
 
-            <!-- Wizard Navigation Buttons -->
+            <!-- Wizard Controls -->
             <div class="flex justify-between items-center">
                 <button id="btnPrev" onclick="prevStep()" class="hidden bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-medium px-6 py-2.5 rounded-xl transition">
                     <i class="fa-solid fa-arrow-right ml-1"></i> السابق
@@ -248,7 +276,7 @@
                 <h2 class="text-2xl font-bold text-white mb-2">تم إنشاء بطاقتك بنجاح!</h2>
                 <p class="text-slate-400 text-sm mb-6">امسح كود QR بكاميرا الهاتف للوصول للبطاقة الشخصية الرقمية</p>
 
-                <!-- Optimized QR Container -->
+                <!-- QR Container -->
                 <div class="bg-white p-6 rounded-2xl inline-block shadow-2xl mb-6 border-4 border-slate-800/80">
                     <div id="qrcodeCanvas"></div>
                 </div>
@@ -279,12 +307,54 @@
 
         <!-- 4. PUBLIC DIGITAL CARD VIEW -->
         <section id="viewPublicCard" class="hidden max-w-md mx-auto py-4">
-            <div id="publicCardContent" class="glass-card border border-slate-800 rounded-3xl p-6 shadow-2xl">
-                <!-- Public Card Content Dynamic -->
-            </div>
+            <div id="publicCardContent" class="glass-card border border-slate-800 rounded-3xl p-6 shadow-2xl"></div>
         </section>
 
     </main>
+
+    <!-- Modal Alert Window -->
+    <div id="alertModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative text-center">
+            <!-- Close (X) Button -->
+            <button onclick="closeAlertModal()" class="absolute top-3 left-3 text-slate-400 hover:text-white w-8 h-8 rounded-lg bg-slate-800/60 flex items-center justify-center transition text-lg">
+                &times;
+            </button>
+            <div class="w-12 h-12 bg-amber-500/20 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-3 text-amber-400 text-xl">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <h3 id="modalTitle" class="text-xl font-bold text-white mb-2">عذرًا!</h3>
+            <p id="modalMessage" class="text-slate-300 text-sm mb-6 leading-relaxed">يرجى إدخال الاسم واللقب قبل المتابعة.</p>
+            
+            <div id="modalActions" class="flex gap-2">
+                <button onclick="closeAlertModal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition text-sm">
+                    حسنًا
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Home Navigation Modal -->
+    <div id="confirmHomeModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative text-center">
+            <button onclick="closeConfirmModal()" class="absolute top-3 left-3 text-slate-400 hover:text-white w-8 h-8 rounded-lg bg-slate-800/60 flex items-center justify-center transition text-lg">
+                &times;
+            </button>
+            <div class="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-2xl flex items-center justify-center mx-auto mb-3 text-blue-400 text-xl">
+                <i class="fa-solid fa-house"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">مغادرة نموذج البطاقة؟</h3>
+            <p class="text-slate-300 text-sm mb-6 leading-relaxed">هل تريد العودة إلى الصفحة الرئيسية؟ قد تفقد المعلومات التي أدخلتها ولم تحفظها بعد.</p>
+            
+            <div class="flex gap-2">
+                <button onclick="closeConfirmModal()" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2.5 rounded-xl border border-slate-700 transition text-sm">
+                    متابعة التحرير
+                </button>
+                <button onclick="confirmGoHome()" class="w-1/2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition text-sm">
+                    العودة
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="border-t border-slate-800/80 bg-slate-950/90 py-6 text-center text-slate-400 text-sm">
@@ -299,7 +369,8 @@
     <script>
         let currentStep = 1;
         let generatedCardUrl = "";
-        
+        let pendingFocusFieldId = null;
+
         const platforms = [
             { id: 'instagram', name: 'Instagram', defaultLabel: 'حسابي على إنستغرام', icon: 'fa-brands fa-instagram', color: 'text-pink-500' },
             { id: 'facebook', name: 'Facebook', defaultLabel: 'حسابي على فيسبوك', icon: 'fa-brands fa-facebook', color: 'text-blue-500' },
@@ -311,8 +382,31 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initSocialInputs();
-            checkUrlHash();
+            checkUrlQuery();
         });
+
+        // Safe Navigation to Home
+        function requestHomeNavigation() {
+            const fname = document.getElementById('inputFirstName').value.trim();
+            const lname = document.getElementById('inputLastName').value.trim();
+            const desc = document.getElementById('inputDescription').value.trim();
+            
+            // Check if user entered any data in wizard
+            if (fname || lname || desc) {
+                document.getElementById('confirmHomeModal').classList.remove('hidden');
+            } else {
+                showView('home');
+            }
+        }
+
+        function confirmGoHome() {
+            closeConfirmModal();
+            showView('home');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmHomeModal').classList.add('hidden');
+        }
 
         function showView(viewName) {
             document.getElementById('viewHome').classList.add('hidden');
@@ -341,6 +435,9 @@
             document.getElementById('inputFirstName').value = '';
             document.getElementById('inputLastName').value = '';
             document.getElementById('inputDescription').value = '';
+            clearInputError('inputFirstName');
+            clearInputError('inputLastName');
+
             document.getElementById('phoneList').innerHTML = '';
             document.getElementById('whatsappList').innerHTML = '';
             document.getElementById('emailList').innerHTML = '';
@@ -489,12 +586,45 @@
             }
         }
 
+        function clearInputError(fieldId) {
+            const input = document.getElementById(fieldId);
+            if (input) input.classList.remove('field-error');
+        }
+
+        function showAlertModal(title, message, focusTargetId) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            pendingFocusFieldId = focusTargetId;
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
+
+        function closeAlertModal() {
+            document.getElementById('alertModal').classList.add('hidden');
+            if (pendingFocusFieldId) {
+                const targetInput = document.getElementById(pendingFocusFieldId);
+                if (targetInput) {
+                    targetInput.classList.add('field-error');
+                    targetInput.focus();
+                }
+                pendingFocusFieldId = null;
+            }
+        }
+
         function nextStep() {
             if (currentStep === 1) {
                 const fname = document.getElementById('inputFirstName').value.trim();
                 const lname = document.getElementById('inputLastName').value.trim();
-                if (!fname || !lname) {
-                    alert('يرجى أدخل الاسم واللقب للمتابعة');
+
+                if (!fname && !lname) {
+                    showAlertModal('عذرًا!', 'يرجى إدخال الاسم واللقب قبل المتابعة.', 'inputFirstName');
+                    return;
+                }
+                if (!fname && lname) {
+                    showAlertModal('عذرًا!', 'يرجى إدخال الاسم قبل المتابعة.', 'inputFirstName');
+                    return;
+                }
+                if (fname && !lname) {
+                    showAlertModal('عذرًا!', 'يرجى إدخال اللقب قبل المتابعة.', 'inputLastName');
                     return;
                 }
             }
@@ -692,14 +822,37 @@
             document.getElementById('reviewCardContainer').innerHTML = renderCardHTML(data);
         }
 
-        function generateQrAndSave() {
-            const data = getFormData();
-            const jsonStr = JSON.stringify(data);
-            const encoded = encodeURIComponent(jsonStr);
-            
-            const baseUrl = window.location.origin + window.location.pathname;
-            generatedCardUrl = baseUrl + '#card=' + encoded;
+        // Generate Random Safe Clean Card ID (No Personal Info In URL)
+        function generateRandomCardId() {
+            return 'c_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36).substring(4);
+        }
 
+        async function generateQrAndSave() {
+            const btnText = document.getElementById('generateBtnText');
+            btnText.innerText = 'جاري الحفظ...';
+            
+            const data = getFormData();
+            const cardId = generateRandomCardId();
+            const baseUrl = window.location.origin + window.location.pathname;
+
+            // Secure clean public URL without personal params in URL
+            generatedCardUrl = baseUrl + '?id=' + cardId;
+
+            // Attempt Cloud Save via Firestore
+            try {
+                if (window.db && window.firestoreDoc && window.firestoreSetDoc) {
+                    const docRef = window.firestoreDoc(window.db, "artifacts", "defaultApp", "public", "data", "cards", cardId);
+                    await window.firestoreSetDoc(docRef, data);
+                } else {
+                    // Local Storage Fallback
+                    localStorage.setItem('kherfi_card_' + cardId, JSON.stringify(data));
+                }
+            } catch (err) {
+                console.warn("Cloud save fallback to local storage:", err);
+                localStorage.setItem('kherfi_card_' + cardId, JSON.stringify(data));
+            }
+
+            // Render QR Code with Clean Safe Link
             const container = document.getElementById('qrcodeCanvas');
             container.innerHTML = '';
             
@@ -712,6 +865,7 @@
                 correctLevel : QRCode.CorrectLevel.M
             });
 
+            btnText.innerText = 'إنشاء كود QR';
             showView('result');
         }
 
@@ -739,30 +893,48 @@
         }
 
         function viewCardDirectly() {
-            window.location.hash = generatedCardUrl.split('#')[1];
-            checkUrlHash();
+            window.location.href = generatedCardUrl;
         }
 
-        function checkUrlHash() {
-            const hash = window.location.hash;
-            if (hash.startsWith('#card=')) {
-                try {
-                    const encoded = hash.replace('#card=', '');
-                    const jsonStr = decodeURIComponent(encoded);
-                    const data = JSON.parse(jsonStr);
+        async function checkUrlQuery() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cardId = urlParams.get('id');
 
-                    document.getElementById('publicCardContent').innerHTML = renderCardHTML(data);
-                    showView('publicCard');
+            if (cardId) {
+                let cardData = null;
+
+                // Try Firestore first
+                try {
+                    if (window.db && window.firestoreDoc && window.firestoreGetDoc) {
+                        const docRef = window.firestoreDoc(window.db, "artifacts", "defaultApp", "public", "data", "cards", cardId);
+                        const docSnap = await window.firestoreGetDoc(docRef);
+                        if (docSnap.exists()) {
+                            cardData = docSnap.data();
+                        }
+                    }
                 } catch (e) {
-                    console.error("خطأ في قراءة بيانات البطاقة من الرابط", e);
+                    console.warn("Could not fetch from Firestore:", e);
+                }
+
+                // Fallback to localStorage
+                if (!cardData) {
+                    const localData = localStorage.getItem('kherfi_card_' + cardId);
+                    if (localData) {
+                        try { cardData = JSON.parse(localData); } catch(e){}
+                    }
+                }
+
+                if (cardData) {
+                    document.getElementById('publicCardContent').innerHTML = renderCardHTML(cardData);
+                    showView('publicCard');
+                } else {
+                    showAlertModal('البطاقة غير موجودة', 'تعذر العثور على بيانات هذه البطاقة الرقمية.');
                     showView('home');
                 }
             } else {
                 showView('home');
             }
         }
-
-        window.addEventListener('hashchange', checkUrlHash);
     </script>
 </body>
 </html>
