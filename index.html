@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مولد البطاقات الرقمية وكود QR</title>
+    <title>KHERFI_QR — إنشاء بطاقتك الشخصية الرقمية وكود QR</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -14,24 +14,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body { font-family: 'Tajawal', sans-serif; }
-        .step-active { border-color: #3b82f6; color: #3b82f6; }
+        .step-active { border-color: #3b82f6; color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
         .step-done { border-color: #10b981; background-color: #10b981; color: white; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glow-effect { box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.3); }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-blue-500 selection:text-white">
 
     <!-- Header Navigation -->
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3 space-x-reverse cursor-pointer" onclick="showView('home')">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-xl font-bold shadow-lg shadow-blue-500/30">
-                    <i class="fa-solid fa-qrcode"></i>
+    <header class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse cursor-pointer group" onclick="showView('home')">
+                <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-xl font-bold shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
+                    <i class="fa-solid fa-qrcode text-white"></i>
                 </div>
-                <span class="text-xl font-bold tracking-wide">بطاقتي <span class="text-blue-500">QR</span></span>
+                <span class="text-xl font-extrabold tracking-wide text-white">KHERFI<span class="text-blue-500">_QR</span></span>
             </div>
+            
+            <!-- Button in Public Card View -->
             <div id="cardBadgeView" class="hidden">
-                <button onclick="startWizard()" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">
-                    <i class="fa-solid fa-plus ml-1"></i> إنشاء بطاقتك
+                <button onclick="startWizard()" class="text-xs md:text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-4 py-2 rounded-xl shadow-lg shadow-blue-500/20 transition transform hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>إنشاء كود QR جديد</span>
                 </button>
             </div>
         </div>
@@ -41,45 +46,45 @@
     <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-8">
 
         <!-- 1. HOME VIEW -->
-        <section id="viewHome" class="text-center py-12 flex flex-col items-center">
+        <section id="viewHome" class="text-center py-8 md:py-16 flex flex-col items-center">
             <div class="relative mb-8">
-                <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-30 animate-pulse"></div>
-                <div class="relative bg-slate-800 p-6 rounded-2xl border border-slate-700/80 shadow-2xl">
-                    <i class="fa-solid fa-qrcode text-8xl text-blue-400"></i>
+                <div class="absolute -inset-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl blur-xl opacity-40 animate-pulse"></div>
+                <div class="relative glass-card p-8 rounded-3xl border border-slate-700/80 glow-effect">
+                    <i class="fa-solid fa-qrcode text-8xl md:text-9xl bg-gradient-to-tr from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent"></i>
                 </div>
             </div>
 
             <h1 class="text-3xl md:text-5xl font-extrabold mb-4 text-white leading-tight">
-                كل معلوماتك وروابطك في <span class="text-blue-500">مكان واحد</span>
+                كل معلوماتك وروابطك في <span class="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">مكان واحد</span>
             </h1>
-            <p class="text-slate-400 text-base md:text-lg max-w-2xl mb-8 leading-relaxed">
-                أنشئ بطاقتك الرقمية، واجمع معلوماتك الشخصية وروابط التواصل في كود QR واحد، وشاركها بسهولة مع الآخرين.
+            <p class="text-slate-400 text-base md:text-lg max-w-2xl mb-8 leading-relaxed font-normal">
+                أنشئ بطاقتك الشخصية الرقمية، واجمع معلومات الاتصال وروابط التواصل الاجتماعي الخاصة بك في كود QR واحد أنيق وشاركه بسهولة.
             </p>
 
-            <button onclick="startWizard()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-3">
+            <button onclick="startWizard()" class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 text-white font-bold text-lg px-9 py-4 rounded-2xl shadow-xl shadow-blue-600/30 transition transform hover:-translate-y-1 active:translate-y-0 flex items-center gap-3">
                 <span>ابدأ الآن</span>
                 <i class="fa-solid fa-arrow-left"></i>
             </button>
 
-            <p class="mt-6 text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-full">
-                <i class="fa-solid fa-circle-info ml-1"></i> الموقع قيد التطوير، وسيتم إضافة ميزات جديدة قريبًا.
+            <p class="mt-8 text-xs text-amber-300/90 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-full backdrop-blur-sm">
+                <i class="fa-solid fa-circle-info ml-1 text-amber-400"></i> الموقع قيد التطوير، وسيتم إضافة ميزات جديدة قريبًا.
             </p>
         </section>
 
         <!-- 2. WIZARD FORM VIEW -->
         <section id="viewWizard" class="hidden">
             <!-- Progress Steps Header -->
-            <div class="mb-8 bg-slate-800/50 p-4 rounded-2xl border border-slate-800">
+            <div class="mb-8 glass-card p-4 rounded-2xl border border-slate-800">
                 <div class="flex justify-between items-center relative">
-                    <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-700 -z-0"></div>
+                    <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-800 -z-0"></div>
                     
                     <!-- Step Indicators -->
-                    <div id="stepIndicator1" class="relative z-10 w-10 h-10 rounded-full border-2 bg-slate-800 flex items-center justify-center font-bold text-sm transition-all step-active">1</div>
-                    <div id="stepIndicator2" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm transition-all">2</div>
-                    <div id="stepIndicator3" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm transition-all">3</div>
-                    <div id="stepIndicator4" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm transition-all">4</div>
+                    <div id="stepIndicator1" class="relative z-10 w-10 h-10 rounded-full border-2 bg-slate-900 flex items-center justify-center font-bold text-sm transition-all duration-300 step-active">1</div>
+                    <div id="stepIndicator2" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-800 bg-slate-900 text-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300">2</div>
+                    <div id="stepIndicator3" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-800 bg-slate-900 text-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300">3</div>
+                    <div id="stepIndicator4" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-800 bg-slate-900 text-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300">4</div>
                 </div>
-                <div class="flex justify-between text-xs text-slate-400 mt-3 px-1">
+                <div class="flex justify-between text-xs text-slate-400 mt-3 px-1 font-medium">
                     <span>الشخصية</span>
                     <span>الاتصال</span>
                     <span>الروابط</span>
@@ -88,30 +93,31 @@
             </div>
 
             <!-- Form Cards Body -->
-            <div class="bg-slate-800/80 rounded-2xl border border-slate-700 p-6 shadow-xl mb-6">
+            <div class="glass-card rounded-2xl border border-slate-800 p-6 shadow-2xl mb-6">
                 
                 <!-- STEP 1: Personal Info -->
                 <div id="stepContent1" class="space-y-6">
-                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">
-                        <i class="fa-solid fa-user text-blue-400 ml-2"></i>الخطوة الأولى: المعلومات الشخصية
+                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear text-blue-400"></i>
+                        <span>الخطوة الأولى: المعلومات الشخصية</span>
                     </h2>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-1">الاسم <span class="text-red-400">*</span></label>
-                            <input type="text" id="inputFirstName" placeholder="أدخل اسمك" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+                            <label class="block text-sm font-medium text-slate-300 mb-1.5">الاسم <span class="text-red-400">*</span></label>
+                            <input type="text" id="inputFirstName" autocomplete="given-name" name="given-name" placeholder="أدخل اسمك" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-1">اللقب <span class="text-red-400">*</span></label>
-                            <input type="text" id="inputLastName" placeholder="أدخل لقبك" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+                            <label class="block text-sm font-medium text-slate-300 mb-1.5">اللقب <span class="text-red-400">*</span></label>
+                            <input type="text" id="inputLastName" autocomplete="family-name" name="family-name" placeholder="أدخل لقبك" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                         </div>
                     </div>
 
-                    <!-- Under Development Image Upload Widget -->
+                    <!-- Image Upload (Under Development) -->
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-2">الصورة الشخصية</label>
-                        <div class="border-2 border-dashed border-slate-700 rounded-xl p-6 text-center bg-slate-900/40 relative">
-                            <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+                        <div class="border-2 border-dashed border-slate-800 rounded-2xl p-6 text-center bg-slate-900/30 relative">
+                            <div class="w-12 h-12 bg-slate-800/80 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
                                 <i class="fa-solid fa-image text-xl"></i>
                             </div>
                             <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs px-3 py-1 rounded-full mb-2 font-medium">
@@ -124,15 +130,16 @@
 
                 <!-- STEP 2: Contacts (Dynamic) -->
                 <div id="stepContent2" class="hidden space-y-6">
-                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">
-                        <i class="fa-solid fa-address-book text-blue-400 ml-2"></i>الخطوة الثانية: معلومات الاتصال
+                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-address-book text-blue-400"></i>
+                        <span>الخطوة الثانية: معلومات الاتصال</span>
                     </h2>
                     
                     <!-- Dynamic Phones -->
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-slate-300">أرقام الهاتف</label>
-                            <button type="button" onclick="addDynamicField('phoneList')" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-2.5 py-1 rounded-lg border border-blue-500/30 transition flex items-center gap-1">
+                            <button type="button" onclick="addDynamicField('phoneList')" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg border border-blue-500/30 transition flex items-center gap-1.5 font-medium">
                                 <i class="fa-solid fa-plus"></i> إضافة رقم هاتف
                             </button>
                         </div>
@@ -143,7 +150,7 @@
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-slate-300">أرقام واتساب</label>
-                            <button type="button" onclick="addDynamicField('whatsappList')" class="text-xs bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white px-2.5 py-1 rounded-lg border border-emerald-500/30 transition flex items-center gap-1">
+                            <button type="button" onclick="addDynamicField('whatsappList')" class="text-xs bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white px-3 py-1.5 rounded-lg border border-emerald-500/30 transition flex items-center gap-1.5 font-medium">
                                 <i class="fa-solid fa-plus"></i> إضافة رقم واتساب
                             </button>
                         </div>
@@ -154,7 +161,7 @@
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-slate-300">عناوين البريد الإلكتروني</label>
-                            <button type="button" onclick="addDynamicField('emailList')" class="text-xs bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white px-2.5 py-1 rounded-lg border border-indigo-500/30 transition flex items-center gap-1">
+                            <button type="button" onclick="addDynamicField('emailList')" class="text-xs bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white px-3 py-1.5 rounded-lg border border-indigo-500/30 transition flex items-center gap-1.5 font-medium">
                                 <i class="fa-solid fa-plus"></i> إضافة بريد إلكتروني
                             </button>
                         </div>
@@ -164,16 +171,17 @@
 
                 <!-- STEP 3: Social Links (Dynamic) -->
                 <div id="stepContent3" class="hidden space-y-6">
-                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">
-                        <i class="fa-solid fa-share-nodes text-blue-400 ml-2"></i>الخطوة الثالثة: روابط التواصل الاجتماعي
+                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-share-nodes text-blue-400"></i>
+                        <span>الخطوة الثالثة: روابط التواصل الاجتماعي</span>
                     </h2>
 
                     <div id="socialPlatformsList" class="space-y-4"></div>
 
-                    <div class="pt-4 border-t border-slate-700">
+                    <div class="pt-4 border-t border-slate-800">
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-slate-300">روابط مخصصة إضافية</label>
-                            <button type="button" onclick="addCustomLinkField()" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-2.5 py-1 rounded-lg border border-blue-500/30 transition flex items-center gap-1">
+                            <button type="button" onclick="addCustomLinkField()" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg border border-blue-500/30 transition flex items-center gap-1.5 font-medium">
                                 <i class="fa-solid fa-plus"></i> إضافة رابط مخصص
                             </button>
                         </div>
@@ -183,15 +191,16 @@
 
                 <!-- STEP 4: Review & Generate -->
                 <div id="stepContent4" class="hidden space-y-6">
-                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">
-                        <i class="fa-solid fa-eye text-blue-400 ml-2"></i>الخطوة الرابعة: مراجعة المعلومات
+                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-eye text-blue-400"></i>
+                        <span>الخطوة الرابعة: مراجعة المعلومات</span>
                     </h2>
 
-                    <div id="reviewCardContainer" class="bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-lg">
-                        <!-- Review Card Content Dynamic -->
+                    <div id="reviewCardContainer" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                        <!-- Review Card Injected Here -->
                     </div>
 
-                    <button id="btnGenerateQr" onclick="generateQrAndSave()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 text-lg">
+                    <button id="btnGenerateQr" onclick="generateQrAndSave()" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/30 transition transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 text-lg">
                         <i class="fa-solid fa-qrcode"></i>
                         <span>إنشاء كود QR</span>
                     </button>
@@ -199,13 +208,13 @@
 
             </div>
 
-            <!-- Wizard Controls -->
+            <!-- Wizard Navigation Buttons -->
             <div class="flex justify-between items-center">
-                <button id="btnPrev" onclick="prevStep()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium px-6 py-2.5 rounded-xl transition">
+                <button id="btnPrev" onclick="prevStep()" class="hidden bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-medium px-6 py-2.5 rounded-xl transition">
                     <i class="fa-solid fa-arrow-right ml-1"></i> السابق
                 </button>
                 <div></div>
-                <button id="btnNext" onclick="nextStep()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-2.5 rounded-xl shadow-lg shadow-blue-600/20 transition">
+                <button id="btnNext" onclick="nextStep()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-8 py-2.5 rounded-xl shadow-lg shadow-blue-600/20 transition">
                     التالي <i class="fa-solid fa-arrow-left mr-1"></i>
                 </button>
             </div>
@@ -213,33 +222,36 @@
 
         <!-- 3. QR RESULT VIEW -->
         <section id="viewResult" class="hidden py-6">
-            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-2xl text-center max-w-lg mx-auto">
+            <div class="glass-card border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl text-center max-w-lg mx-auto">
+                <div class="w-12 h-12 bg-emerald-500/20 border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-3 text-emerald-400 text-xl">
+                    <i class="fa-solid fa-check-double"></i>
+                </div>
                 <h2 class="text-2xl font-bold text-white mb-2">تم إنشاء بطاقتك بنجاح!</h2>
                 <p class="text-slate-400 text-sm mb-6">امسح كود QR بكاميرا الهاتف للوصول للبطاقة الشخصية الرقمية</p>
 
-                <!-- QR Container -->
-                <div class="bg-white p-4 rounded-2xl inline-block shadow-inner mb-6 border-4 border-slate-700">
+                <!-- QR Display Container -->
+                <div class="bg-white p-4 rounded-2xl inline-block shadow-2xl mb-6 border-4 border-slate-800/80">
                     <div id="qrcodeCanvas"></div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="space-y-3">
-                    <button onclick="downloadQrCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+                    <button onclick="downloadQrCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2 text-sm">
                         <i class="fa-solid fa-download"></i>
                         <span>تحميل كود QR بصيغة PNG</span>
                     </button>
 
-                    <button onclick="copyCardUrl()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 rounded-xl border border-slate-600 transition flex items-center justify-center gap-2">
+                    <button onclick="copyCardUrl()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3.5 rounded-xl border border-slate-700 transition flex items-center justify-center gap-2 text-sm">
                         <i class="fa-solid fa-copy"></i>
                         <span id="copyBtnText">نسخ رابط البطاقة</span>
                     </button>
 
-                    <button onclick="viewCardDirectly()" class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 py-3 rounded-xl border border-blue-500/30 transition flex items-center justify-center gap-2 font-medium">
+                    <button onclick="viewCardDirectly()" class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 py-3 rounded-xl border border-blue-500/30 transition flex items-center justify-center gap-2 text-sm font-medium">
                         <i class="fa-solid fa-external-link"></i>
                         <span>عرض البطاقة الرقمية</span>
                     </button>
 
-                    <button onclick="startWizard()" class="w-full bg-transparent hover:bg-slate-700/50 text-slate-400 py-2.5 rounded-xl transition text-sm">
+                    <button onclick="startWizard()" class="w-full bg-transparent hover:bg-slate-800/50 text-slate-400 py-2.5 rounded-xl transition text-xs">
                         <i class="fa-solid fa-plus ml-1"></i> إنشاء بطاقة جديدة
                     </button>
                 </div>
@@ -248,15 +260,15 @@
 
         <!-- 4. PUBLIC DIGITAL CARD VIEW -->
         <section id="viewPublicCard" class="hidden max-w-md mx-auto py-4">
-            <div id="publicCardContent" class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-2xl">
-                <!-- Content Injected Dynamically -->
+            <div id="publicCardContent" class="glass-card border border-slate-800 rounded-3xl p-6 shadow-2xl">
+                <!-- Public Card Content Dynamic -->
             </div>
         </section>
 
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-800 bg-slate-900/90 py-6 text-center text-slate-400 text-sm">
+    <footer class="border-t border-slate-800/80 bg-slate-950/90 py-6 text-center text-slate-400 text-sm">
         <div class="max-w-5xl mx-auto px-4 space-y-2">
             <p class="font-medium text-slate-300">تم إنشاء هذا الموقع بواسطة محمد أمين خرفي</p>
             <p class="text-xs text-slate-500">جميع الحقوق محفوظة © 2026</p>
@@ -334,13 +346,14 @@
 
             let placeholder = 'رقم الهاتف';
             let type = 'tel';
+            let autoComp = 'tel';
             if (containerId === 'whatsappList') placeholder = 'رقم واتساب (مع رمز الدولة)';
-            if (containerId === 'emailList') { placeholder = 'البريد الإلكتروني'; type = 'email'; }
+            if (containerId === 'emailList') { placeholder = 'البريد الإلكتروني'; type = 'email'; autoComp = 'email'; }
 
             div.innerHTML = `
-                <input type="text" placeholder="تسمية (اختياري)" value="${label}" class="w-1/3 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                <input type="${type}" placeholder="${placeholder}" value="${value}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
-                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition">
+                <input type="text" placeholder="تسمية (اختياري)" value="${label}" class="w-1/3 bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 transition">
+                <input type="${type}" autocomplete="${autoComp}" placeholder="${placeholder}" value="${value}" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition text-xs">
                     <i class="fa-solid fa-minus"></i>
                 </button>
             `;
@@ -358,13 +371,13 @@
 
             platforms.forEach(p => {
                 const group = document.createElement('div');
-                group.className = 'bg-slate-900/50 p-3 rounded-xl border border-slate-700/60';
+                group.className = 'bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800';
                 group.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs font-semibold ${p.color} flex items-center gap-1.5">
-                            <i class="${p.icon}"></i> ${p.name}
+                            <i class="${p.icon} text-sm"></i> ${p.name}
                         </span>
-                        <button type="button" onclick="addSocialField('${p.id}')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+                        <button type="button" onclick="addSocialField('${p.id}')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-medium transition">
                             <i class="fa-solid fa-plus"></i> إضافة حساب
                         </button>
                     </div>
@@ -382,8 +395,8 @@
             div.className = 'flex gap-2 items-center';
             div.id = fieldId;
             div.innerHTML = `
-                <input type="url" placeholder="https://..." value="${value}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
-                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition text-xs">
+                <input type="url" placeholder="https://..." value="${value}" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
+                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition text-xs">
                     <i class="fa-solid fa-minus"></i>
                 </button>
             `;
@@ -397,9 +410,9 @@
             div.className = 'flex gap-2 items-center';
             div.id = fieldId;
             div.innerHTML = `
-                <input type="text" placeholder="عنوان الرابط" value="${title}" class="w-1/3 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                <input type="url" placeholder="https://..." value="${url}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
-                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition text-xs">
+                <input type="text" placeholder="عنوان الرابط" value="${title}" class="w-1/3 bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                <input type="url" placeholder="https://..." value="${url}" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
+                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition text-xs">
                     <i class="fa-solid fa-minus"></i>
                 </button>
             `;
@@ -413,13 +426,13 @@
                 
                 if (step === currentStep) {
                     content.classList.remove('hidden');
-                    indicator.className = "relative z-10 w-10 h-10 rounded-full border-2 bg-slate-800 flex items-center justify-center font-bold text-sm transition-all step-active";
+                    indicator.className = "relative z-10 w-10 h-10 rounded-full border-2 bg-slate-900 flex items-center justify-center font-bold text-sm transition-all duration-300 step-active";
                 } else if (step < currentStep) {
                     content.classList.add('hidden');
-                    indicator.className = "relative z-10 w-10 h-10 rounded-full border-2 border-emerald-500 bg-emerald-500 text-white flex items-center justify-center font-bold text-sm transition-all";
+                    indicator.className = "relative z-10 w-10 h-10 rounded-full border-2 border-emerald-500 bg-emerald-500 text-white flex items-center justify-center font-bold text-sm transition-all duration-300";
                 } else {
                     content.classList.add('hidden');
-                    indicator.className = "relative z-10 w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm transition-all";
+                    indicator.className = "relative z-10 w-10 h-10 rounded-full border-2 border-slate-800 bg-slate-900 text-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300";
                 }
             });
 
@@ -512,20 +525,20 @@
         function renderCardHTML(data) {
             let html = `
                 <div class="text-center mb-6">
-                    <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-full mx-auto flex items-center justify-center text-3xl font-bold text-white shadow-lg mb-3">
+                    <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 rounded-2xl mx-auto flex items-center justify-center text-3xl font-extrabold text-white shadow-xl mb-3">
                         ${data.firstName.charAt(0)}
                     </div>
                     <h3 class="text-2xl font-bold text-white">${data.firstName} ${data.lastName}</h3>
                 </div>
-                <div class="space-y-4">
+                <div class="space-y-3">
             `;
 
             if (data.phones.length > 0) {
                 html += `<div class="space-y-2">`;
                 data.phones.forEach(p => {
                     html += `
-                        <a href="tel:${p.val}" class="flex items-center justify-between p-3 bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-slate-200 transition">
-                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md">${p.label || 'هاتف'}</span>
+                        <a href="tel:${p.val}" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md font-medium">${p.label || 'هاتف'}</span>
                             <span class="font-medium text-sm dir-ltr">${p.val}</span>
                             <i class="fa-solid fa-phone text-blue-400"></i>
                         </a>
@@ -539,8 +552,8 @@
                 data.whatsapps.forEach(w => {
                     const cleanNum = w.val.replace(/[^0-9]/g, '');
                     html += `
-                        <a href="https://wa.me/${cleanNum}" target="_blank" class="flex items-center justify-between p-3 bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-slate-200 transition">
-                            <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-md">${w.label || 'واتساب'}</span>
+                        <a href="https://wa.me/${cleanNum}" target="_blank" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                            <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-md font-medium">${w.label || 'واتساب'}</span>
                             <span class="font-medium text-sm dir-ltr">${w.val}</span>
                             <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i>
                         </a>
@@ -553,9 +566,9 @@
                 html += `<div class="space-y-2">`;
                 data.emails.forEach(e => {
                     html += `
-                        <a href="mailto:${e.val}" class="flex items-center justify-between p-3 bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-slate-200 transition">
-                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md">${e.label || 'بريد'}</span>
-                            <span class="font-medium text-sm dir-ltr truncate max-w-[200px]">${e.val}</span>
+                        <a href="mailto:${e.val}" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md font-medium">${e.label || 'بريد'}</span>
+                            <span class="font-medium text-sm dir-ltr truncate max-w-[180px]">${e.val}</span>
                             <i class="fa-solid fa-envelope text-indigo-400"></i>
                         </a>
                     `;
@@ -564,14 +577,14 @@
             }
 
             let hasSocials = false;
-            let socialHtml = `<div class="pt-2 border-t border-slate-700/80"><div class="grid grid-cols-1 gap-2">`;
+            let socialHtml = `<div class="pt-2 border-t border-slate-800"><div class="grid grid-cols-1 gap-2">`;
             
             platforms.forEach(p => {
                 const list = data.socials[p.id] || [];
                 list.forEach(url => {
                     hasSocials = true;
                     socialHtml += `
-                        <a href="${url}" target="_blank" class="flex items-center justify-between p-3 bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-slate-200 transition">
+                        <a href="${url}" target="_blank" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
                             <i class="${p.icon} ${p.color} text-lg"></i>
                             <span class="text-sm font-medium">${p.name}</span>
                             <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
@@ -583,10 +596,10 @@
             if (hasSocials) html += socialHtml;
 
             if (data.customLinks.length > 0) {
-                html += `<div class="pt-2 border-t border-slate-700/80 space-y-2">`;
+                html += `<div class="pt-2 border-t border-slate-800 space-y-2">`;
                 data.customLinks.forEach(cl => {
                     html += `
-                        <a href="${cl.url}" target="_blank" class="flex items-center justify-between p-3 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-300 transition">
+                        <a href="${cl.url}" target="_blank" class="flex items-center justify-between p-3.5 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-300 transition">
                             <i class="fa-solid fa-link text-xs"></i>
                             <span class="text-sm font-medium">${cl.title}</span>
                             <i class="fa-solid fa-external-link text-xs"></i>
@@ -620,7 +633,7 @@
                 text: generatedCardUrl,
                 width: 220,
                 height: 220,
-                colorDark : "#0f172a",
+                colorDark : "#090d16",
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.H
             });
@@ -638,7 +651,7 @@
             if (src) {
                 const a = document.createElement('a');
                 a.href = src;
-                a.download = 'QR_Business_Card.png';
+                a.download = 'KHERFI_QR_Card.png';
                 a.click();
             }
         }
