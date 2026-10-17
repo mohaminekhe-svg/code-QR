@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مولد البطاقات الرقمية وكود QR</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+        .step-active { border-color: #3b82f6; color: #3b82f6; }
+        .step-done { border-color: #10b981; background-color: #10b981; color: white; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse cursor-pointer" onclick="showView('home')">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-xl font-bold shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <span class="text-xl font-bold tracking-wide">بطاقتي <span class="text-blue-500">QR</span></span>
+            </div>
+            <div id="cardBadgeView" class="hidden">
+                <button onclick="startWizard()" class="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">
+                    <i class="fa-solid fa-plus ml-1"></i> إنشاء بطاقتك
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-8">
+
+        <!-- 1. HOME VIEW -->
+        <section id="viewHome" class="text-center py-12 flex flex-col items-center">
+            <div class="relative mb-8">
+                <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-30 animate-pulse"></div>
+                <div class="relative bg-slate-800 p-6 rounded-2xl border border-slate-700/80 shadow-2xl">
+                    <i class="fa-solid fa-qrcode text-8xl text-blue-400"></i>
+                </div>
+            </div>
+
+            <h1 class="text-3xl md:text-5xl font-extrabold mb-4 text-white leading-tight">
+                كل معلوماتك وروابطك في <span class="text-blue-500">مكان واحد</span>
+            </h1>
+            <p class="text-slate-400 text-base md:text-lg max-w-2xl mb-8 leading-relaxed">
+                أنشئ بطاقتك الرقمية، واجمع معلوماتك الشخصية وروابط التواصل في كود QR واحد، وشاركها بسهولة مع الآخرين.
+            </p>
+
+            <button onclick="startWizard()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-lg shadow-blue-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-3">
+                <span>ابدأ الآن</span>
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+
+            <p class="mt-6 text-xs text-amber-400/90 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-full">
+                <i class="fa-solid fa-circle-info ml-1"></i> الموقع قيد التطوير، وسيتم إضافة ميزات جديدة قريبًا.
+            </p>
+        </section>
+
+        <!-- 2. WIZARD FORM VIEW -->
+        <section id="viewWizard" class="hidden">
+            <!-- Progress Steps Header -->
+            <div class="mb-8 bg-slate-800/50 p-4 rounded-2xl border border-slate-800">
+                <div class="flex justify-between items-center relative">
+                    <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-700 -z-0"></div>
+                    
+                    <!-- Step Indicators -->
+                    <div id="stepIndicator1" class="relative z-10 w-10 h-10 rounded-full border-2 bg-slate-800 flex items-center justify-center font-bold text-sm transition-all step-active">1</div>
+                    <div id="stepIndicator2" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm transition-all">2</div>
+                    <div id="stepIndicator3" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm transition-all">3</div>
+                    <div id="stepIndicator4" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm transition-all">4</div>
+                </div>
+                <div class="flex justify-between text-xs text-slate-400 mt-3 px-1">
+                    <span>الشخصية</span>
+                    <span>الاتصال</span>
+                    <span>الروابط</span>
+                    <span>المراجعة</span>
+                </div>
+            </div>
+
+            <!-- Form Cards Body -->
+            <div class="bg-slate-800/80 rounded-2xl border border-slate-700 p-6 shadow-xl mb-6">
+                
+                <!-- STEP 1: Personal Info -->
+                <div id="stepContent1" class="space-y-6">
+                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">
+                        <i class="fa-solid fa-user text-blue-400 ml-2"></i>الخطوة الأولى: المعلومات الشخصية
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">الاسم <span class="text-red-400">*</span></label>
+                            <input type="text" id="inputFirstName" placeholder="أدخل اسمك" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">اللقب <span class="text-red-400">*</span></label>
+                            <input type="text" id="inputLastName" placeholder="أدخل لقبك" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+                        </div>
+                    </div>
+
+                    <!-- Under Development Image Upload Widget -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">الصورة الشخصية</label>
+                        <div class="border-2 border-dashed border-slate-700 rounded-xl p-6 text-center bg-slate-900/40 relative">
+                            <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-400">
+                                <i class="fa-solid fa-image text-xl"></i>
+                            </div>
+                            <span class="inline-block bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs px-3 py-1 rounded-full mb-2 font-medium">
+                                رفع الصورة — قيد التطوير
+                            </span>
+                            <p class="text-xs text-slate-400">ستتوفر ميزة رفع وحفظ الصورة الشخصية في التحديث القادم.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Contacts (Dynamic) -->
+                <div id="stepContent2" class="hidden space-y-6">
+                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">
+                        <i class="fa-solid fa-address-book text-blue-400 ml-2"></i>الخطوة الثانية: معلومات الاتصال
+                    </h2>
+                    
+                    <!-- Dynamic Phones -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-slate-300">أرقام الهاتف</label>
+                            <button type="button" onclick="addDynamicField('phoneList')" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-2.5 py-1 rounded-lg border border-blue-500/30 transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> إضافة رقم هاتف
+                            </button>
+                        </div>
+                        <div id="phoneList" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Dynamic WhatsApp -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-slate-300">أرقام واتساب</label>
+                            <button type="button" onclick="addDynamicField('whatsappList')" class="text-xs bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600 hover:text-white px-2.5 py-1 rounded-lg border border-emerald-500/30 transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> إضافة رقم واتساب
+                            </button>
+                        </div>
+                        <div id="whatsappList" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Dynamic Emails -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-slate-300">عناوين البريد الإلكتروني</label>
+                            <button type="button" onclick="addDynamicField('emailList')" class="text-xs bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white px-2.5 py-1 rounded-lg border border-indigo-500/30 transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> إضافة بريد إلكتروني
+                            </button>
+                        </div>
+                        <div id="emailList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Social Links (Dynamic) -->
+                <div id="stepContent3" class="hidden space-y-6">
+                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">
+                        <i class="fa-solid fa-share-nodes text-blue-400 ml-2"></i>الخطوة الثالثة: روابط التواصل الاجتماعي
+                    </h2>
+
+                    <div id="socialPlatformsList" class="space-y-4"></div>
+
+                    <div class="pt-4 border-t border-slate-700">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-slate-300">روابط مخصصة إضافية</label>
+                            <button type="button" onclick="addCustomLinkField()" class="text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-2.5 py-1 rounded-lg border border-blue-500/30 transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> إضافة رابط مخصص
+                            </button>
+                        </div>
+                        <div id="customLinksList" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Review & Generate -->
+                <div id="stepContent4" class="hidden space-y-6">
+                    <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">
+                        <i class="fa-solid fa-eye text-blue-400 ml-2"></i>الخطوة الرابعة: مراجعة المعلومات
+                    </h2>
+
+                    <div id="reviewCardContainer" class="bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-lg">
+                        <!-- Review Card Content Dynamic -->
+                    </div>
+
+                    <button id="btnGenerateQr" onclick="generateQrAndSave()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 text-lg">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <span>إنشاء كود QR</span>
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Wizard Controls -->
+            <div class="flex justify-between items-center">
+                <button id="btnPrev" onclick="prevStep()" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium px-6 py-2.5 rounded-xl transition">
+                    <i class="fa-solid fa-arrow-right ml-1"></i> السابق
+                </button>
+                <div></div>
+                <button id="btnNext" onclick="nextStep()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-2.5 rounded-xl shadow-lg shadow-blue-600/20 transition">
+                    التالي <i class="fa-solid fa-arrow-left mr-1"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. QR RESULT VIEW -->
+        <section id="viewResult" class="hidden py-6">
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 shadow-2xl text-center max-w-lg mx-auto">
+                <h2 class="text-2xl font-bold text-white mb-2">تم إنشاء بطاقتك بنجاح!</h2>
+                <p class="text-slate-400 text-sm mb-6">امسح كود QR بكاميرا الهاتف للوصول للبطاقة الشخصية الرقمية</p>
+
+                <!-- QR Container -->
+                <div class="bg-white p-4 rounded-2xl inline-block shadow-inner mb-6 border-4 border-slate-700">
+                    <div id="qrcodeCanvas"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="space-y-3">
+                    <button onclick="downloadQrCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i>
+                        <span>تحميل كود QR بصيغة PNG</span>
+                    </button>
+
+                    <button onclick="copyCardUrl()" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 rounded-xl border border-slate-600 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-copy"></i>
+                        <span id="copyBtnText">نسخ رابط البطاقة</span>
+                    </button>
+
+                    <button onclick="viewCardDirectly()" class="w-full bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 py-3 rounded-xl border border-blue-500/30 transition flex items-center justify-center gap-2 font-medium">
+                        <i class="fa-solid fa-external-link"></i>
+                        <span>عرض البطاقة الرقمية</span>
+                    </button>
+
+                    <button onclick="startWizard()" class="w-full bg-transparent hover:bg-slate-700/50 text-slate-400 py-2.5 rounded-xl transition text-sm">
+                        <i class="fa-solid fa-plus ml-1"></i> إنشاء بطاقة جديدة
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. PUBLIC DIGITAL CARD VIEW -->
+        <section id="viewPublicCard" class="hidden max-w-md mx-auto py-4">
+            <div id="publicCardContent" class="bg-slate-800 border border-slate-700 rounded-3xl p-6 shadow-2xl">
+                <!-- Content Injected Dynamically -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-900/90 py-6 text-center text-slate-400 text-sm">
+        <div class="max-w-5xl mx-auto px-4 space-y-2">
+            <p class="font-medium text-slate-300">تم إنشاء هذا الموقع بواسطة محمد أمين خرفي</p>
+            <p class="text-xs text-slate-500">جميع الحقوق محفوظة © 2026</p>
+            <p class="text-xs text-amber-500/80 pt-1">الموقع قيد التطوير — سيتم إضافة ميزات وتحسينات جديدة قريبًا.</p>
+        </div>
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        let currentStep = 1;
+        let generatedCardUrl = "";
+        
+        const platforms = [
+            { id: 'instagram', name: 'Instagram', icon: 'fa-brands fa-instagram', color: 'text-pink-500' },
+            { id: 'facebook', name: 'Facebook', icon: 'fa-brands fa-facebook', color: 'text-blue-500' },
+            { id: 'tiktok', name: 'TikTok', icon: 'fa-brands fa-tiktok', color: 'text-white' },
+            { id: 'youtube', name: 'YouTube', icon: 'fa-brands fa-youtube', color: 'text-red-500' },
+            { id: 'linkedin', name: 'LinkedIn', icon: 'fa-brands fa-linkedin', color: 'text-blue-400' },
+            { id: 'website', name: 'الموقع الشخصي', icon: 'fa-solid fa-globe', color: 'text-emerald-400' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initSocialInputs();
+            checkUrlHash();
+        });
+
+        function showView(viewName) {
+            document.getElementById('viewHome').classList.add('hidden');
+            document.getElementById('viewWizard').classList.add('hidden');
+            document.getElementById('viewResult').classList.add('hidden');
+            document.getElementById('viewPublicCard').classList.add('hidden');
+            document.getElementById('cardBadgeView').classList.add('hidden');
+
+            if (viewName === 'home') document.getElementById('viewHome').classList.remove('hidden');
+            if (viewName === 'wizard') document.getElementById('viewWizard').classList.remove('hidden');
+            if (viewName === 'result') document.getElementById('viewResult').classList.remove('hidden');
+            if (viewName === 'publicCard') {
+                document.getElementById('viewPublicCard').classList.remove('hidden');
+                document.getElementById('cardBadgeView').classList.remove('hidden');
+            }
+        }
+
+        function startWizard() {
+            currentStep = 1;
+            resetFormData();
+            updateStepView();
+            showView('wizard');
+        }
+
+        function resetFormData() {
+            document.getElementById('inputFirstName').value = '';
+            document.getElementById('inputLastName').value = '';
+            document.getElementById('phoneList').innerHTML = '';
+            document.getElementById('whatsappList').innerHTML = '';
+            document.getElementById('emailList').innerHTML = '';
+            document.getElementById('customLinksList').innerHTML = '';
+            
+            addDynamicField('phoneList');
+            addDynamicField('whatsappList');
+            addDynamicField('emailList');
+            
+            platforms.forEach(p => {
+                const list = document.getElementById(`list_${p.id}`);
+                if (list) list.innerHTML = '';
+                addSocialField(p.id);
+            });
+        }
+
+        function addDynamicField(containerId, value = '', label = '') {
+            const container = document.getElementById(containerId);
+            const fieldId = 'field_' + Math.random().toString(36).substr(2, 9);
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center';
+            div.id = fieldId;
+
+            let placeholder = 'رقم الهاتف';
+            let type = 'tel';
+            if (containerId === 'whatsappList') placeholder = 'رقم واتساب (مع رمز الدولة)';
+            if (containerId === 'emailList') { placeholder = 'البريد الإلكتروني'; type = 'email'; }
+
+            div.innerHTML = `
+                <input type="text" placeholder="تسمية (اختياري)" value="${label}" class="w-1/3 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                <input type="${type}" placeholder="${placeholder}" value="${value}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeDynamicField(fieldId) {
+            const el = document.getElementById(fieldId);
+            if (el) el.remove();
+        }
+
+        function initSocialInputs() {
+            const container = document.getElementById('socialPlatformsList');
+            container.innerHTML = '';
+
+            platforms.forEach(p => {
+                const group = document.createElement('div');
+                group.className = 'bg-slate-900/50 p-3 rounded-xl border border-slate-700/60';
+                group.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-semibold ${p.color} flex items-center gap-1.5">
+                            <i class="${p.icon}"></i> ${p.name}
+                        </span>
+                        <button type="button" onclick="addSocialField('${p.id}')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> إضافة حساب
+                        </button>
+                    </div>
+                    <div id="list_${p.id}" class="space-y-2"></div>
+                `;
+                container.appendChild(group);
+            });
+        }
+
+        function addSocialField(platformId, value = '') {
+            const container = document.getElementById(`list_${platformId}`);
+            if (!container) return;
+            const fieldId = 'soc_' + Math.random().toString(36).substr(2, 9);
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center';
+            div.id = fieldId;
+            div.innerHTML = `
+                <input type="url" placeholder="https://..." value="${value}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
+                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition text-xs">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function addCustomLinkField(title = '', url = '') {
+            const container = document.getElementById('customLinksList');
+            const fieldId = 'cust_' + Math.random().toString(36).substr(2, 9);
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center';
+            div.id = fieldId;
+            div.innerHTML = `
+                <input type="text" placeholder="عنوان الرابط" value="${title}" class="w-1/3 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                <input type="url" placeholder="https://..." value="${url}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
+                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition text-xs">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function updateStepView() {
+            [1, 2, 3, 4].forEach(step => {
+                const content = document.getElementById(`stepContent${step}`);
+                const indicator = document.getElementById(`stepIndicator${step}`);
+                
+                if (step === currentStep) {
+                    content.classList.remove('hidden');
+                    indicator.className = "relative z-10 w-10 h-10 rounded-full border-2 bg-slate-800 flex items-center justify-center font-bold text-sm transition-all step-active";
+                } else if (step < currentStep) {
+                    content.classList.add('hidden');
+                    indicator.className = "relative z-10 w-10 h-10 rounded-full border-2 border-emerald-500 bg-emerald-500 text-white flex items-center justify-center font-bold text-sm transition-all";
+                } else {
+                    content.classList.add('hidden');
+                    indicator.className = "relative z-10 w-10 h-10 rounded-full border-2 border-slate-700 bg-slate-800 text-slate-500 flex items-center justify-center font-bold text-sm transition-all";
+                }
+            });
+
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+
+            if (currentStep === 1) btnPrev.classList.add('hidden');
+            else btnPrev.classList.remove('hidden');
+
+            if (currentStep === 4) {
+                btnNext.classList.add('hidden');
+                renderReviewCard();
+            } else {
+                btnNext.classList.remove('hidden');
+            }
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                const fname = document.getElementById('inputFirstName').value.trim();
+                const lname = document.getElementById('inputLastName').value.trim();
+                if (!fname || !lname) {
+                    alert('يرجى أدخل الاسم واللقب للمتابعة');
+                    return;
+                }
+            }
+            if (currentStep < 4) {
+                currentStep++;
+                updateStepView();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepView();
+            }
+        }
+
+        function getFormData() {
+            const data = {
+                firstName: document.getElementById('inputFirstName').value.trim(),
+                lastName: document.getElementById('inputLastName').value.trim(),
+                phones: [],
+                whatsapps: [],
+                emails: [],
+                socials: {},
+                customLinks: []
+            };
+
+            document.querySelectorAll('#phoneList > div').forEach(div => {
+                const inputs = div.querySelectorAll('input');
+                const label = inputs[0].value.trim();
+                const val = inputs[1].value.trim();
+                if (val) data.phones.push({ label, val });
+            });
+
+            document.querySelectorAll('#whatsappList > div').forEach(div => {
+                const inputs = div.querySelectorAll('input');
+                const label = inputs[0].value.trim();
+                const val = inputs[1].value.trim();
+                if (val) data.whatsapps.push({ label, val });
+            });
+
+            document.querySelectorAll('#emailList > div').forEach(div => {
+                const inputs = div.querySelectorAll('input');
+                const label = inputs[0].value.trim();
+                const val = inputs[1].value.trim();
+                if (val) data.emails.push({ label, val });
+            });
+
+            platforms.forEach(p => {
+                data.socials[p.id] = [];
+                document.querySelectorAll(`#list_${p.id} input`).forEach(inp => {
+                    const val = inp.value.trim();
+                    if (val) data.socials[p.id].push(val);
+                });
+            });
+
+            document.querySelectorAll('#customLinksList > div').forEach(div => {
+                const inputs = div.querySelectorAll('input');
+                const title = inputs[0].value.trim() || 'رابط';
+                const url = inputs[1].value.trim();
+                if (url) data.customLinks.push({ title, url });
+            });
+
+            return data;
+        }
+
+        function renderCardHTML(data) {
+            let html = `
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-full mx-auto flex items-center justify-center text-3xl font-bold text-white shadow-lg mb-3">
+                        ${data.firstName.charAt(0)}
+                    </div>
+                    <h3 class="text-2xl font-bold text-white">${data.firstName} ${data.lastName}</h3>
+                </div>
+                <div class="space-y-4">
+            `;
+
+            if (data.phones.length > 0) {
+                html += `<div class="space-y-2">`;
+                data.phones.forEach(p => {
+                    html += `
+                        <a href="tel:${p.val}" class="flex items-center justify-between p-3 bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-slate-200 transition">
+                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md">${p.label || 'هاتف'}</span>
+                            <span class="font-medium text-sm dir-ltr">${p.val}</span>
+                            <i class="fa-solid fa-phone text-blue-400"></i>
+                        </a>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            if (data.whatsapps.length > 0) {
+                html += `<div class="space-y-2">`;
+                data.whatsapps.forEach(w => {
+                    const cleanNum = w.val.replace(/[^0-9]/g, '');
+                    html += `
+                        <a href="https://wa.me/${cleanNum}" target="_blank" class="flex items-center justify-between p-3 bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-slate-200 transition">
+                            <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-md">${w.label || 'واتساب'}</span>
+                            <span class="font-medium text-sm dir-ltr">${w.val}</span>
+                            <i class="fa-brands fa-whatsapp text-emerald-400 text-lg"></i>
+                        </a>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            if (data.emails.length > 0) {
+                html += `<div class="space-y-2">`;
+                data.emails.forEach(e => {
+                    html += `
+                        <a href="mailto:${e.val}" class="flex items-center justify-between p-3 bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-slate-200 transition">
+                            <span class="text-xs bg-slate-800 text-slate-400 px-2 py-1 rounded-md">${e.label || 'بريد'}</span>
+                            <span class="font-medium text-sm dir-ltr truncate max-w-[200px]">${e.val}</span>
+                            <i class="fa-solid fa-envelope text-indigo-400"></i>
+                        </a>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            let hasSocials = false;
+            let socialHtml = `<div class="pt-2 border-t border-slate-700/80"><div class="grid grid-cols-1 gap-2">`;
+            
+            platforms.forEach(p => {
+                const list = data.socials[p.id] || [];
+                list.forEach(url => {
+                    hasSocials = true;
+                    socialHtml += `
+                        <a href="${url}" target="_blank" class="flex items-center justify-between p-3 bg-slate-900/80 hover:bg-slate-900 border border-slate-700/80 rounded-xl text-slate-200 transition">
+                            <i class="${p.icon} ${p.color} text-lg"></i>
+                            <span class="text-sm font-medium">${p.name}</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
+                        </a>
+                    `;
+                });
+            });
+            socialHtml += `</div></div>`;
+            if (hasSocials) html += socialHtml;
+
+            if (data.customLinks.length > 0) {
+                html += `<div class="pt-2 border-t border-slate-700/80 space-y-2">`;
+                data.customLinks.forEach(cl => {
+                    html += `
+                        <a href="${cl.url}" target="_blank" class="flex items-center justify-between p-3 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-300 transition">
+                            <i class="fa-solid fa-link text-xs"></i>
+                            <span class="text-sm font-medium">${cl.title}</span>
+                            <i class="fa-solid fa-external-link text-xs"></i>
+                        </a>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            html += `</div>`;
+            return html;
+        }
+
+        function renderReviewCard() {
+            const data = getFormData();
+            document.getElementById('reviewCardContainer').innerHTML = renderCardHTML(data);
+        }
+
+        function generateQrAndSave() {
+            const data = getFormData();
+            const jsonStr = JSON.stringify(data);
+            const encoded = encodeURIComponent(jsonStr);
+            
+            const baseUrl = window.location.origin + window.location.pathname;
+            generatedCardUrl = baseUrl + '#card=' + encoded;
+
+            const container = document.getElementById('qrcodeCanvas');
+            container.innerHTML = '';
+            
+            new QRCode(container, {
+                text: generatedCardUrl,
+                width: 220,
+                height: 220,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            showView('result');
+        }
+
+        function downloadQrCode() {
+            const img = document.querySelector('#qrcodeCanvas img');
+            const canvas = document.querySelector('#qrcodeCanvas canvas');
+            let src = '';
+            if (img && img.src) src = img.src;
+            else if (canvas) src = canvas.toDataURL("image/png");
+
+            if (src) {
+                const a = document.createElement('a');
+                a.href = src;
+                a.download = 'QR_Business_Card.png';
+                a.click();
+            }
+        }
+
+        function copyCardUrl() {
+            navigator.clipboard.writeText(generatedCardUrl).then(() => {
+                const txt = document.getElementById('copyBtnText');
+                txt.innerText = 'تم النسخ بنجاح!';
+                setTimeout(() => txt.innerText = 'نسخ رابط البطاقة', 2000);
+            });
+        }
+
+        function viewCardDirectly() {
+            window.location.hash = generatedCardUrl.split('#')[1];
+            checkUrlHash();
+        }
+
+        function checkUrlHash() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#card=')) {
+                try {
+                    const encoded = hash.replace('#card=', '');
+                    const jsonStr = decodeURIComponent(encoded);
+                    const data = JSON.parse(jsonStr);
+
+                    document.getElementById('publicCardContent').innerHTML = renderCardHTML(data);
+                    showView('publicCard');
+                } catch (e) {
+                    console.error("خطأ في قراءة بيانات البطاقة من الرابط", e);
+                    showView('home');
+                }
+            } else {
+                showView('home');
+            }
+        }
+
+        window.addEventListener('hashchange', checkUrlHash);
+    </script>
+</body>
+</html>
