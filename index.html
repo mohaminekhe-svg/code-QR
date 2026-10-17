@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KHERFI_QR — إنشاء بطاقتك الشخصية الرقمية وكود QR</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%230f172a%22/><path d=%22M20 20h25v25H20zM55 20h25v25H55zM20 55h25v25H20zM60 60h15v15H60zM55 80h10v10H55zM80 55h10v10H80zM80 75h10v15H80z%22 fill=%22%233b82f6%22/></svg>">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -15,8 +17,7 @@
     <style>
         body { font-family: 'Tajawal', sans-serif; }
         .step-active { border-color: #3b82f6; color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
-        .step-done { border-color: #10b981; background-color: #10b981; color: white; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .glow-effect { box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.3); }
     </style>
 </head>
@@ -32,7 +33,6 @@
                 <span class="text-xl font-extrabold tracking-wide text-white">KHERFI<span class="text-blue-500">_QR</span></span>
             </div>
             
-            <!-- Button in Public Card View -->
             <div id="cardBadgeView" class="hidden">
                 <button onclick="startWizard()" class="text-xs md:text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-4 py-2 rounded-xl shadow-lg shadow-blue-500/20 transition transform hover:scale-105 active:scale-95 flex items-center gap-2">
                     <i class="fa-solid fa-plus text-xs"></i>
@@ -78,7 +78,6 @@
                 <div class="flex justify-between items-center relative">
                     <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-800 -z-0"></div>
                     
-                    <!-- Step Indicators -->
                     <div id="stepIndicator1" class="relative z-10 w-10 h-10 rounded-full border-2 bg-slate-900 flex items-center justify-center font-bold text-sm transition-all duration-300 step-active">1</div>
                     <div id="stepIndicator2" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-800 bg-slate-900 text-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300">2</div>
                     <div id="stepIndicator3" class="relative z-10 w-10 h-10 rounded-full border-2 border-slate-800 bg-slate-900 text-slate-500 flex items-center justify-center font-bold text-sm transition-all duration-300">3</div>
@@ -105,15 +104,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-300 mb-1.5">الاسم <span class="text-red-400">*</span></label>
-                            <input type="text" id="inputFirstName" autocomplete="given-name" name="given-name" placeholder="أدخل اسمك" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
+                            <input type="text" id="inputFirstName" autocomplete="given-name" placeholder="أدخل اسمك" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-300 mb-1.5">اللقب <span class="text-red-400">*</span></label>
-                            <input type="text" id="inputLastName" autocomplete="family-name" name="family-name" placeholder="أدخل لقبك" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
+                            <input type="text" id="inputLastName" autocomplete="family-name" placeholder="أدخل لقبك" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-sm">
                         </div>
                     </div>
 
-                    <!-- Image Upload (Under Development) -->
                     <div>
                         <label class="block text-sm font-medium text-slate-300 mb-2">الصورة الشخصية</label>
                         <div class="border-2 border-dashed border-slate-800 rounded-2xl p-6 text-center bg-slate-900/30 relative">
@@ -135,7 +133,6 @@
                         <span>الخطوة الثانية: معلومات الاتصال</span>
                     </h2>
                     
-                    <!-- Dynamic Phones -->
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-slate-300">أرقام الهاتف</label>
@@ -146,7 +143,6 @@
                         <div id="phoneList" class="space-y-3"></div>
                     </div>
 
-                    <!-- Dynamic WhatsApp -->
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-slate-300">أرقام واتساب</label>
@@ -157,7 +153,6 @@
                         <div id="whatsappList" class="space-y-3"></div>
                     </div>
 
-                    <!-- Dynamic Emails -->
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label class="block text-sm font-medium text-slate-300">عناوين البريد الإلكتروني</label>
@@ -169,7 +164,7 @@
                     </div>
                 </div>
 
-                <!-- STEP 3: Social Links (Dynamic) -->
+                <!-- STEP 3: Social Links (Dynamic with Label & URL separation) -->
                 <div id="stepContent3" class="hidden space-y-6">
                     <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-3 flex items-center gap-2">
                         <i class="fa-solid fa-share-nodes text-blue-400"></i>
@@ -229,8 +224,8 @@
                 <h2 class="text-2xl font-bold text-white mb-2">تم إنشاء بطاقتك بنجاح!</h2>
                 <p class="text-slate-400 text-sm mb-6">امسح كود QR بكاميرا الهاتف للوصول للبطاقة الشخصية الرقمية</p>
 
-                <!-- QR Display Container -->
-                <div class="bg-white p-4 rounded-2xl inline-block shadow-2xl mb-6 border-4 border-slate-800/80">
+                <!-- Optimized QR Container with Quiet Zone -->
+                <div class="bg-white p-6 rounded-2xl inline-block shadow-2xl mb-6 border-4 border-slate-800/80">
                     <div id="qrcodeCanvas"></div>
                 </div>
 
@@ -282,12 +277,12 @@
         let generatedCardUrl = "";
         
         const platforms = [
-            { id: 'instagram', name: 'Instagram', icon: 'fa-brands fa-instagram', color: 'text-pink-500' },
-            { id: 'facebook', name: 'Facebook', icon: 'fa-brands fa-facebook', color: 'text-blue-500' },
-            { id: 'tiktok', name: 'TikTok', icon: 'fa-brands fa-tiktok', color: 'text-white' },
-            { id: 'youtube', name: 'YouTube', icon: 'fa-brands fa-youtube', color: 'text-red-500' },
-            { id: 'linkedin', name: 'LinkedIn', icon: 'fa-brands fa-linkedin', color: 'text-blue-400' },
-            { id: 'website', name: 'الموقع الشخصي', icon: 'fa-solid fa-globe', color: 'text-emerald-400' }
+            { id: 'instagram', name: 'Instagram', defaultLabel: 'حسابي على إنستغرام', icon: 'fa-brands fa-instagram', color: 'text-pink-500' },
+            { id: 'facebook', name: 'Facebook', defaultLabel: 'حسابي على فيسبوك', icon: 'fa-brands fa-facebook', color: 'text-blue-500' },
+            { id: 'tiktok', name: 'TikTok', defaultLabel: 'تيك توك الخاص بي', icon: 'fa-brands fa-tiktok', color: 'text-white' },
+            { id: 'youtube', name: 'YouTube', defaultLabel: 'قناتي على يوتيوب', icon: 'fa-brands fa-youtube', color: 'text-red-500' },
+            { id: 'linkedin', name: 'LinkedIn', defaultLabel: 'حسابي على لينكد إن', icon: 'fa-brands fa-linkedin', color: 'text-blue-400' },
+            { id: 'website', name: 'الموقع الشخصي', defaultLabel: 'موقعي الإلكتروني', icon: 'fa-solid fa-globe', color: 'text-emerald-400' }
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -333,7 +328,7 @@
             platforms.forEach(p => {
                 const list = document.getElementById(`list_${p.id}`);
                 if (list) list.innerHTML = '';
-                addSocialField(p.id);
+                addSocialField(p.id, p.defaultLabel, '');
             });
         }
 
@@ -371,50 +366,69 @@
 
             platforms.forEach(p => {
                 const group = document.createElement('div');
-                group.className = 'bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800';
+                group.className = 'bg-slate-900/50 p-4 rounded-2xl border border-slate-800 space-y-3';
                 group.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="flex justify-between items-center">
                         <span class="text-xs font-semibold ${p.color} flex items-center gap-1.5">
                             <i class="${p.icon} text-sm"></i> ${p.name}
                         </span>
-                        <button type="button" onclick="addSocialField('${p.id}')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-medium transition">
-                            <i class="fa-solid fa-plus"></i> إضافة حساب
+                        <button type="button" onclick="addSocialField('${p.id}', '${p.defaultLabel}', '')" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-medium transition">
+                            <i class="fa-solid fa-plus"></i> إضافة حساب آخر
                         </button>
                     </div>
-                    <div id="list_${p.id}" class="space-y-2"></div>
+                    <div id="list_${p.id}" class="space-y-3"></div>
                 `;
                 container.appendChild(group);
             });
         }
 
-        function addSocialField(platformId, value = '') {
+        function addSocialField(platformId, labelVal = '', urlVal = '') {
             const container = document.getElementById(`list_${platformId}`);
             if (!container) return;
             const fieldId = 'soc_' + Math.random().toString(36).substr(2, 9);
             const div = document.createElement('div');
-            div.className = 'flex gap-2 items-center';
+            div.className = 'p-3 bg-slate-900/90 border border-slate-800 rounded-xl space-y-2 relative';
             div.id = fieldId;
+            
             div.innerHTML = `
-                <input type="url" placeholder="https://..." value="${value}" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
-                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition text-xs">
-                    <i class="fa-solid fa-minus"></i>
-                </button>
+                <div class="flex justify-between items-center gap-2">
+                    <div class="w-full">
+                        <label class="block text-[11px] text-slate-400 mb-1">اسم الرابط:</label>
+                        <input type="text" placeholder="اسم الرابط (مثال: حسابي على إنستغرام)" value="${labelVal}" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition text-xs mt-5">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">رابط الحساب (URL):</label>
+                    <input type="url" placeholder="https://..." value="${urlVal}" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
+                </div>
             `;
             container.appendChild(div);
         }
 
-        function addCustomLinkField(title = '', url = '') {
+        function addCustomLinkField(titleVal = '', urlVal = '') {
             const container = document.getElementById('customLinksList');
             const fieldId = 'cust_' + Math.random().toString(36).substr(2, 9);
             const div = document.createElement('div');
-            div.className = 'flex gap-2 items-center';
+            div.className = 'p-3 bg-slate-900/90 border border-slate-800 rounded-xl space-y-2 relative';
             div.id = fieldId;
+            
             div.innerHTML = `
-                <input type="text" placeholder="عنوان الرابط" value="${title}" class="w-1/3 bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-                <input type="url" placeholder="https://..." value="${url}" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
-                <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition text-xs">
-                    <i class="fa-solid fa-minus"></i>
-                </button>
+                <div class="flex justify-between items-center gap-2">
+                    <div class="w-full">
+                        <label class="block text-[11px] text-slate-400 mb-1">اسم الرابط:</label>
+                        <input type="text" placeholder="عنوان الرابط (مثال: موقعي الشخصي)" value="${titleVal}" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition text-xs mt-5">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">رابط الحساب (URL):</label>
+                    <input type="url" placeholder="https://..." value="${urlVal}" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 dir-ltr text-right">
+                </div>
             `;
             container.appendChild(div);
         }
@@ -506,9 +520,11 @@
 
             platforms.forEach(p => {
                 data.socials[p.id] = [];
-                document.querySelectorAll(`#list_${p.id} input`).forEach(inp => {
-                    const val = inp.value.trim();
-                    if (val) data.socials[p.id].push(val);
+                document.querySelectorAll(`#list_${p.id} > div`).forEach(item => {
+                    const inputs = item.querySelectorAll('input');
+                    const label = inputs[0].value.trim() || p.defaultLabel;
+                    const url = inputs[1].value.trim();
+                    if (url) data.socials[p.id].push({ label, url });
                 });
             });
 
@@ -581,12 +597,12 @@
             
             platforms.forEach(p => {
                 const list = data.socials[p.id] || [];
-                list.forEach(url => {
+                list.forEach(item => {
                     hasSocials = true;
                     socialHtml += `
-                        <a href="${url}" target="_blank" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
+                        <a href="${item.url}" target="_blank" class="flex items-center justify-between p-3.5 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl text-slate-200 transition">
                             <i class="${p.icon} ${p.color} text-lg"></i>
-                            <span class="text-sm font-medium">${p.name}</span>
+                            <span class="text-sm font-medium">${item.label}</span>
                             <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-500"></i>
                         </a>
                     `;
@@ -629,13 +645,14 @@
             const container = document.getElementById('qrcodeCanvas');
             container.innerHTML = '';
             
+            // Optimal QR Config for easy scanning with Medium error correction (M)
             new QRCode(container, {
                 text: generatedCardUrl,
                 width: 220,
                 height: 220,
                 colorDark : "#090d16",
                 colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
+                correctLevel : QRCode.CorrectLevel.M
             });
 
             showView('result');
