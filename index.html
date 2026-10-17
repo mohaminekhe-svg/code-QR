@@ -46,11 +46,28 @@
     <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-8">
 
         <!-- 1. HOME VIEW -->
-        <section id="viewHome" class="text-center py-8 md:py-16 flex flex-col items-center">
-            <div class="relative mb-8">
-                <div class="absolute -inset-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl blur-xl opacity-40 animate-pulse"></div>
-                <div class="relative glass-card p-8 rounded-3xl border border-slate-700/80 glow-effect">
-                    <i class="fa-solid fa-qrcode text-8xl md:text-9xl bg-gradient-to-tr from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent"></i>
+        <section id="viewHome" class="text-center py-6 md:py-12 flex flex-col items-center">
+            
+            <!-- Project Overview Card with Description under Cover Image -->
+            <div class="w-full max-w-2xl glass-card rounded-3xl border border-slate-800 overflow-hidden shadow-2xl mb-8 text-right">
+                <!-- Cover Image Area -->
+                <div class="relative w-full h-48 md:h-56 bg-slate-900 overflow-hidden flex items-center justify-center border-b border-slate-800/80">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-blue-900/40 via-indigo-900/20 to-purple-900/30"></div>
+                    <i class="fa-solid fa-qrcode text-8xl md:text-9xl bg-gradient-to-tr from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent transform hover:scale-105 transition duration-500"></i>
+                    <span class="absolute top-3 right-3 bg-blue-600/90 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md shadow-md">
+                        مشروع رقمي
+                    </span>
+                </div>
+
+                <!-- Description Below Cover Image -->
+                <div class="p-5 md:p-6 bg-slate-900/90 border-b border-slate-800/80">
+                    <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-align-right text-[11px]"></i>
+                        <span>وصف المشروع</span>
+                    </h4>
+                    <p class="text-slate-300 text-sm md:text-base leading-relaxed font-normal dir-rtl text-justify">
+                        KHERFI_QR هو مشروع تقني يتيح لك جمع معلوماتك الشخصية وروابط التواصل الاجتماعي في بطاقة رقمية واحدة، ومشاركتها بسهولة باستخدام كود QR واحد. المشروع قيد التطوير، وستتم إضافة ميزات جديدة مستقبلًا.
+                    </p>
                 </div>
             </div>
 
@@ -164,7 +181,7 @@
                     </div>
                 </div>
 
-                <!-- STEP 3: Social Links (Dynamic with Label & URL separation) -->
+                <!-- STEP 3: Social Links -->
                 <div id="stepContent3" class="hidden space-y-6">
                     <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-800 pb-3 flex items-center gap-2">
                         <i class="fa-solid fa-share-nodes text-blue-400"></i>
@@ -224,7 +241,7 @@
                 <h2 class="text-2xl font-bold text-white mb-2">تم إنشاء بطاقتك بنجاح!</h2>
                 <p class="text-slate-400 text-sm mb-6">امسح كود QR بكاميرا الهاتف للوصول للبطاقة الشخصية الرقمية</p>
 
-                <!-- Optimized QR Container with Quiet Zone -->
+                <!-- Optimized QR Container -->
                 <div class="bg-white p-6 rounded-2xl inline-block shadow-2xl mb-6 border-4 border-slate-800/80">
                     <div id="qrcodeCanvas"></div>
                 </div>
@@ -394,7 +411,7 @@
                 <div class="flex justify-between items-center gap-2">
                     <div class="w-full">
                         <label class="block text-[11px] text-slate-400 mb-1">اسم الرابط:</label>
-                        <input type="text" placeholder="اسم الرابط (مثال: حسابي على إنستغرام)" value="${labelVal}" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                        <input type="text" placeholder="اسم الرابط" value="${labelVal}" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
                     </div>
                     <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition text-xs mt-5">
                         <i class="fa-solid fa-minus"></i>
@@ -419,7 +436,7 @@
                 <div class="flex justify-between items-center gap-2">
                     <div class="w-full">
                         <label class="block text-[11px] text-slate-400 mb-1">اسم الرابط:</label>
-                        <input type="text" placeholder="عنوان الرابط (مثال: موقعي الشخصي)" value="${titleVal}" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+                        <input type="text" placeholder="عنوان الرابط" value="${titleVal}" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
                     </div>
                     <button type="button" onclick="removeDynamicField('${fieldId}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition text-xs mt-5">
                         <i class="fa-solid fa-minus"></i>
@@ -645,7 +662,6 @@
             const container = document.getElementById('qrcodeCanvas');
             container.innerHTML = '';
             
-            // Optimal QR Config for easy scanning with Medium error correction (M)
             new QRCode(container, {
                 text: generatedCardUrl,
                 width: 220,
